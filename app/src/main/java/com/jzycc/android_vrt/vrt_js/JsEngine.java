@@ -17,7 +17,7 @@ import org.mozilla.javascript.ScriptableObject;
  * author Jzy(Xiaohuntun)
  * date 18-9-26
  */
-public class JsEngine {
+public class JsEngine{
     private Context mContext;
     private Class clazz;
     private String allFunctions = "";
@@ -41,7 +41,7 @@ public class JsEngine {
         allFunctions = "var ScriptAPI = java.lang.Class.forName(\"" + JsEngine.class.getName() + "\", true, javaLoader);\n" +
                 Constant.JS_CODE_4ANDROID+
                 Constant.JAVA_CALL_JS_FUNCTION+
-                Constant.JS_TEST_CODE;
+                Constant.JS_CODE_TEST;
         vc = new ViewController();
     }
 
@@ -67,11 +67,13 @@ public class JsEngine {
         }
     }
 
-    public int api_getBaseViewWidth( ){
+    public int  api_getBaseViewWidth(){
+        Log.i("jzy111", "api_getBaseViewWidth: "+CalculateUtils.getWindowWidth(windowManager));
         return CalculateUtils.getWindowWidth(windowManager);
     }
 
-    public int api_getBaseViewHeight( ){
+    public int api_getBaseViewHeight(){
+        Log.i("jzy111", "api_getBaseViewHeight: "+CalculateUtils.getWindowHeight(windowManager));
         return  CalculateUtils.getWindowHeight(windowManager);
     }
 
@@ -88,7 +90,7 @@ public class JsEngine {
 
     private void setViewController(ViewController vc){
         try{
-            vrtView = new VrtViewParent(mContext,vc);
+           // vrtView = new VrtViewParent(mContext,vc.getView());
             vrtRenderListener.renderSuccess(vrtView);
         }catch (Exception e){
             Log.e("JsEngine", "setViewController: ",e );

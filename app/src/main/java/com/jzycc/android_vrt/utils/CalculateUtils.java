@@ -9,9 +9,7 @@ import android.view.WindowManager;
  */
 public class CalculateUtils {
     public static int getWindowWidth(WindowManager windowManager){
-
         int width = windowManager.getDefaultDisplay().getWidth();
-
         return width;
     }
 

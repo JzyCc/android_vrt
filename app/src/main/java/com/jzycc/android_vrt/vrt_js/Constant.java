@@ -473,6 +473,7 @@ public class Constant {
 
     public static final String JS_TEST_CODE = "" +
             "var mainVC = new ViewController();\n" +
+            "mainVC.view._setFrame(0,0,api_getBaseViewWidth(),api_getBaseViewHeight());"+
             "var label = new Label;\n" +
             "label.vrt_layout.heightIs(60).widthIs(100);\n" +
             "label.text = \"test\";\n" +
@@ -565,4 +566,96 @@ public class Constant {
             "\n" +
             "\n" +
             "\n";
+
+    public static final String JS_CODE_TEST = "function model4Test()\n" +
+            "{\n" +
+            "    this.userName = null;\n" +
+            "}\n" +
+            "\n" +
+            "var dataSource = new Array();\n" +
+            "\n" +
+            "for(var i = 0; i < 10; i++)\n" +
+            "{\n" +
+            "    var model = new model4Test();\n" +
+            "    model.userName = \"userName \" + i;\n" +
+            "    dataSource.push(model);\n" +
+            "}\n" +
+            "\n" +
+            "//创建唯一的视图控制器\n" +
+            "var mainVC = new ViewController();\n" +
+            "\n" +
+            "mainVC.view._setFrame(0,0,api_getBaseViewWidth()*1,api_getBaseViewHeight()*1);\n"+
+            "\n" +
+            "//在视图不同阶段添加回调\n" +
+            "mainVC.addCallBackViewDidLoad(function(){\n" +
+            "    api_log(\"view did load\");\n" +
+            "});\n" +
+            "mainVC.addCallBackViewWillAppear(function(){\n" +
+            "    api_log(\"view will appear\");\n" +
+            "});\n" +
+            "mainVC.addCallBackViewDidAppear(function(){\n" +
+            "    api_log(\"view did appear\");\n" +
+            "});\n" +
+            "mainVC.addCallBackViewWillDisappear(function(){\n" +
+            "    api_log(\"view will disappear\");\n" +
+            "});\n" +
+            "\n" +
+            "//创建一个列表视图\n" +
+            "var list = new List();\n" +
+            "\n" +
+            "//添加列表中cell的点击回调\n" +
+            "list.addCallBackDidSelectRowAtIndexPath(function(section,row){\n" +
+            "    api_log(\" did select section : \" + section + \" row : \" + row);\n" +
+            "});\n" +
+            "\n" +
+            "mainVC.view.addSubView(list);\n" +
+            "list.vrt_layout.topEqualToView(null).leftEqualToView(null).heightRatioToView(null,0.5).widthRatioToView(null,1);\n" +
+            "\n" +
+            "//创建一个cell模版\n" +
+            "var cell = new Cell();\n" +
+            "//设置cell的固定高度 (当前不支持动态高度自适应)\n" +
+            "cell.setCellFixHeight(100);\n" +
+            "\n" +
+            "//创建一个图片视图\n" +
+            "var imgView = new ImgView();\n" +
+            "imgView.imageUrl = \"http://114.55.84.37/anbao/img/dog.png\";\n" +
+            "cell.addSubView(imgView);\n" +
+            "imgView.vrt_layout.topSpaceToView(cell,10).leftSpaceToView(cell,10).heightIs(60).widthEqualToHeight();\n" +
+            "\n" +
+            "//创建一个文本显示视图\n" +
+            "var label1 = new Label();\n" +
+            "//因为该视图是放在cell模版中的、需要bind一个model中的key\n" +
+            "label1.text = \"bindKey:userName\";\n" +
+            "label1.textColor = redColor;\n" +
+            "label1.fontSize = 18;\n" +
+            "cell.addSubView(label1);\n" +
+            "label1.vrt_layout.topSpaceToView(cell,10).leftSpaceToView(imgView,10).heightIs(60).widthIs(150);\n" +
+            "\n" +
+            "//给list设置cell模版、native将根据cell模版生成合适数量的视图、并进行复用\n" +
+            "list.setCellAtSection(0,cell);\n" +
+            "//设置list的数据源\n" +
+            "list.setDataSourceAtSection(0,dataSource);\n" +
+            "\n" +
+            "//创建一个基本的视图、\n" +
+            "var view4testClick = new View();\n" +
+            "view4testClick.backgroundColor = redColor;\n" +
+            "mainVC.view.addSubView(view4testClick);\n" +
+            "view4testClick.vrt_layout.topSpaceToView(list,15).centerXEqualToView(null).heightIs(30).widthIs(100);\n" +
+            "//为该视图增加一个点击事件的回调\n" +
+            "view4testClick.addClick(view4testClick,function(){\n" +
+            "    api_log(\"control test\");\n" +
+            "});\n" +
+            "\n" +
+            "//创建一个文本输入视图\n" +
+            "var textField = new TextField();\n" +
+            "textField.text = \"placeHolder\";\n" +
+            "textField.backgroundColor = blackColor;\n" +
+            "textField.textColor = whiteColor;\n" +
+            "mainVC.view.addSubView(textField);\n" +
+            "textField.vrt_layout.topSpaceToView(list,15).leftSpaceToView(view4testClick,10).heightIs(30).widthIs(100);\n" +
+            "textField.addCallBackDidReturn(function(text){\n" +
+            "    api_log(\"user input text: \" + text);\n" +
+            "});\n" +
+            "//提交这个视图控制器\n" +
+            "commitVC(mainVC);";
 }

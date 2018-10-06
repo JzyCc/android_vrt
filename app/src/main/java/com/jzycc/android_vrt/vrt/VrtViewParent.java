@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -49,9 +51,7 @@ public class VrtViewParent extends FrameLayout{
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed,l,t,r,b);
         final int childCount = getChildCount();
-        Log.i("jzy111", "onLayout: "+childCount);
         for(int i = 0 ;i < childCount; i++){
-            //Log.i("jzy111", "onLayout: "+i);
             View child = getChildAt(i);
             child.layout(points.get(i).x,points.get(i).y,points.get(i).x+getChildAt(i).getWidth(),points.get(i).y+getChildAt(i).getHeight());
         }
@@ -82,11 +82,10 @@ public class VrtViewParent extends FrameLayout{
                             case VrtComponentType.TEXTFIELD:
                                 break;
                             case VrtComponentType.VIEW:
-
+                                setViewParent(vrtView);
                                 break;
                         }
                         points.add(new Point((int) vrtView.get_x(),(int) vrtView.get_y()));
-                        //points.add(new Point(300,300));
                     }
                     break;
             }
@@ -104,17 +103,22 @@ public class VrtViewParent extends FrameLayout{
 
     private void setImageView(VrtViewData vrtView){
         ImageView imageView = new ImageView(getContext());
-        imageView.setMaxWidth((int)vrtView.get_width());
-        imageView.setMaxHeight((int)vrtView.get_height());
+
         this.addView(imageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
-    private void setViewGroup(VrtViewData vrtView){
+    private void setViewParent(VrtViewData vrtView){
         View view = new VrtViewParent(getContext(),vrtView);
         this.addView(view,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
+    private void setRecyclerView(VrtViewData vrtView){
+        RecyclerView recyclerView = new RecyclerView(getContext());
+        LinearLayoutManager linearLayoutManager  = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+    }
     private int getColor(VrtColor vrtColor){
-       return Color.argb(vrtColor.getW(),vrtColor.getX(),vrtColor.getY(),vrtColor.getZ());
+       return Color.argb(100,vrtColor.getX(),vrtColor.getY(),vrtColor.getZ());
     }
 }

@@ -39,7 +39,12 @@ public class MainActivity extends AppCompatActivity implements VrtRenderListener
 
     @Override
     public void renderSuccess(View view) {
-        setContentView(view);
+        //setContentView(view);
+    }
+
+    @Override
+    public void setImageByUrl(View imageView, String imageUrl) {
+
     }
 
 
