@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.jzycc.android_vrt.vrt_js.Constant;
 import com.jzycc.android_vrt.vrt_js.JsEngine;
@@ -30,16 +31,17 @@ public class MainActivity extends AppCompatActivity implements VrtRenderListener
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
 
+        TextView textView = (TextView)findViewById(R.id.tv_text);
+
         jsEngine = new JsEngine(this,this.getWindowManager());
 
         String json = jsEngine.runScript(JsEngine.API_COMMITVC,new Object[]{});
 
-        Log.i("jzy111", "onCreate: "+json);
     }
 
     @Override
     public void renderSuccess(View view) {
-        //setContentView(view);
+        setContentView(view);
     }
 
     @Override
@@ -47,44 +49,4 @@ public class MainActivity extends AppCompatActivity implements VrtRenderListener
 
     }
 
-
-//    private Object runScript(String js, String functionName, Object[] functionParams){
-//        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
-//        rhino.setOptimizationLevel(-1);
-//
-//        try{
-//            Scriptable scope = rhino.initStandardObjects();
-//
-//            ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(MainActivity.this,scope));
-//            ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(MainActivity.class.getClassLoader(),scope));
-//
-//            Object x = rhino.evaluateString(scope, js, "MainActivity", 1, null);
-//
-//            Function function = (Function) scope.get(functionName,scope);
-//
-//            Object result = function.call(rhino,scope,scope,functionParams);
-//
-//
-//            Log.i("jzy111", "runScript: "+result);
-//
-//
-//            return (Object) org.mozilla.javascript.Context.toObject(result,scope);
-//
-//        }finally {
-//            org.mozilla.javascript.Context.exit();
-//        }
-//    }
-//
-//    public static String jsCallJava(String url) {
-//        return url.toString();
-//    }
-//
-//    public static Object native_commitVC(Object vc){
-//        Log.i("jzy111", "native_commitVC: "+vc);
-//        return vc;
-//    }
-//
-//    public static Ob getOb(Ob ob){
-//        return ob;
-//    }
 }

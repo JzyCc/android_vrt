@@ -68,12 +68,10 @@ public class JsEngine{
     }
 
     public int  api_getBaseViewWidth(){
-        Log.i("jzy111", "api_getBaseViewWidth: "+CalculateUtils.getWindowWidth(windowManager));
         return CalculateUtils.getWindowWidth(windowManager);
     }
 
     public int api_getBaseViewHeight(){
-        Log.i("jzy111", "api_getBaseViewHeight: "+CalculateUtils.getWindowHeight(windowManager));
         return  CalculateUtils.getWindowHeight(windowManager);
     }
 
@@ -90,7 +88,8 @@ public class JsEngine{
 
     private void setViewController(ViewController vc){
         try{
-           // vrtView = new VrtViewParent(mContext,vc.getView());
+            Log.i("jzy111", "setViewController: "+mContext);
+            vrtView = new VrtViewParent(mContext,vc.getView());
             vrtRenderListener.renderSuccess(vrtView);
         }catch (Exception e){
             Log.e("JsEngine", "setViewController: ",e );

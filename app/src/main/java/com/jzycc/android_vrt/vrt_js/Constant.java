@@ -473,13 +473,13 @@ public class Constant {
 
     public static final String JS_TEST_CODE = "" +
             "var mainVC = new ViewController();\n" +
-            "mainVC.view._setFrame(0,0,api_getBaseViewWidth(),api_getBaseViewHeight());"+
-            "var label = new Label;\n" +
-            "label.vrt_layout.heightIs(60).widthIs(100);\n" +
+            "mainVC.view._setFrame(0,0,api_getBaseViewWidth()*1,api_getBaseViewHeight()*1);"+
+            "var label = new TextField();\n" +
+            "label.vrt_layout.heightIs(500).widthIs(1000);\n" +
             "label.text = \"test\";\n" +
             "label.textColor = blackColor;\n" +
-            "label._x = 100;\n" +
-            "label._y = 100;\n" +
+            "label._x = 0;\n" +
+            "label._y = 0;\n" +
             "mainVC.view.addSubView(label);\n" +
             "commitVC(mainVC)";
 

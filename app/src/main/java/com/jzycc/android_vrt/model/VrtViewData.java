@@ -1,6 +1,10 @@
 package com.jzycc.android_vrt.model;
 
+import com.jzycc.android_vrt.Ob;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jzy
@@ -22,8 +26,11 @@ public class VrtViewData {
     private Integer fontSize;
     private VrtColor textColor;
     private Integer numberOfLines;
-
+    //ImageView
     private String imageUrl;
+    //Item
+    private HashMap<String,VrtViewData> _cell;
+    private HashMap<String, List<Object>> _dataSource;
 
     public String get_vrtId() {
         return _vrtId;
@@ -135,5 +142,21 @@ public class VrtViewData {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public HashMap<String, VrtViewData> get_cell() {
+        return _cell;
+    }
+
+    public void set_cell(HashMap<String, VrtViewData> _cell) {
+        this._cell = _cell;
+    }
+
+    public HashMap<String, List<Object>> get_dataSource() {
+        return _dataSource;
+    }
+
+    public void set_dataSource(HashMap<String, List<Object>> _dataSource) {
+        this._dataSource = _dataSource;
     }
 }
