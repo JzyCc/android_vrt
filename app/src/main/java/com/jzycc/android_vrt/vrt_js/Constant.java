@@ -539,7 +539,6 @@ public class Constant {
             "    return method_Api_getBaseViewWidth.invoke(javaContext)\n" +
             "}\n" +
             "\n" +
-            "\n" +
             "//获取本地宽\n" +
             "var method_Api_getBaseViewHeight = ScriptAPI.getMethod(\"api_getBaseViewHeight\")\n" +
             "function api_getBaseViewHeight(){\n" +
@@ -551,19 +550,19 @@ public class Constant {
             "    return \"Android\"\n" +
             "}\n" +
             "\n" +
-            "//点击事件\n" +
-            "//var method_Api_responseBasicCallBack = ScriptAPI.getMethod(\"_api_responseBasicCallBack\")\n" +
-            "// function _api_responseBasicCallBack(key){\n" +
-            "//     return method_Api_responseBasicCallBack.invoke(javaContext,key)\n" +
-            "// }\n" +
+            "//刷新view\n" +
+            "var method_Api_refreshView = ScriptAPI.getMethod(\"api_refreshView\",[java.lang.String],[java.lang.String],[java.lang.String])\n" +
+            "function api_refreshView(vrtId, key, newValue){\n" +
+            "    var jsonStr = JSON.stringify(newValue)\n" +
+            "    method_Api_refreshView.invoke(javaContext,vrtId,key,jsonStr)\n" +
+            "}\n" +
             "\n" +
-            "\n" +
-            "// //var method_Api_responseListDidSelectRow = ScriptAPI.getMethod(\"_api_responseListDidSelectRow\")\n" +
-            "// function _api_responseListDidSelectRow(key,section,row){\n" +
-            "    \n" +
-            "// }\n" +
-            "\n" +
-            "\n" +
+            "//网络请求\n" +
+            "var method_Api_httpRequest = ScriptAPI.getMethod(\"api_httpRequest\",[java.lang.String])\n" +
+            "function api_httpRequest(jsObject){\n" +
+            "    var jsonStr = JSON.stringify(jsObject)\n" +
+            "    method_Api_httpRequest.invoke(javaContext,jsonStr)\n" +
+            "}\n" +
             "\n" +
             "\n";
 
