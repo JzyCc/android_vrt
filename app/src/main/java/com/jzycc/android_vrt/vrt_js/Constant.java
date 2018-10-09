@@ -9,6 +9,10 @@ public class Constant {
             "\n" +
             "var vrtViewIndex = 0;\n" +
             "\n" +
+            "var _kHeightScale = 0;\n" +
+            "var _kWidthScale = 0;\n" +
+            "var _kFontScale = 0;\n" +
+            "\n" +
             "function Vec2(x,y)\n" +
             "{\n" +
             "    this.x = x;\n" +
@@ -23,10 +27,10 @@ public class Constant {
             "    this.w = w;\n" +
             "}\n" +
             "\n" +
-            "var redColor = new Vec4(1,0,0,1);\n" +
-            "var greenColor = new Vec4(0,1,0,1);\n" +
-            "var blackColor = new Vec4(0,0,0,1);\n" +
-            "var whiteColor = new Vec4(1,1,1,1);\n" +
+            "var redColor = new Vec4(255,0,0,255);\n" +
+            "var greenColor = new Vec4(0,255,0,255);\n" +
+            "var blackColor = new Vec4(0,0,0,255);\n" +
+            "var whiteColor = new Vec4(255,255,255,255);\n" +
             "var clearColor = new Vec4(0,0,0,0);\n" +
             "\n" +
             "function createColorWithRGBA(r,g,b,a)\n" +
@@ -34,14 +38,12 @@ public class Constant {
             "    return new Vec4(r,g,b,a);\n" +
             "}\n" +
             "\n" +
-            "\n" +
-            "var vrtRectZero = new Vec4(0,0,0,0);\n" +
-            "\n" +
             "function createFrameWithRect(x,y,width,height)\n" +
             "{\n" +
             "    return new Vec4(x,y,width,height);\n" +
             "}\n" +
             "\n" +
+            "var _vrt_kvo_responserIndex = 0;\n" +
             "var _vrt_kvo_responserCache = {};\n" +
             "var _vrt_kvo_targetCache = {};\n" +
             "\n" +
@@ -56,32 +58,33 @@ public class Constant {
             "        _vrt_kvo_targetCache[hashKey] = vrt_kvo_target;\n" +
             "    }\n" +
             "    \n" +
+            "    var repHashKey = hashKey + \"REPINDEXMASK\" + _vrt_kvo_responserIndex++;\n" +
             "    var vrt_kvo_responser = new Object();\n" +
             "    vrt_kvo_responser.callBack = func;\n" +
             "    \n" +
-            "    if(_vrt_kvo_responserCache[hashKey] == undefined)\n" +
+            "    if(_vrt_kvo_responserCache[repHashKey] == undefined)\n" +
             "    {\n" +
-            "        _vrt_kvo_responserCache[hashKey] = new Array();\n" +
+            "        _vrt_kvo_responserCache[repHashKey] = new Array();\n" +
             "        \n" +
             "        Object.defineProperty(target,key,{\n" +
             "                              get : function(){\n" +
-            "                              return vrt_kvo_target.targetValue;\n" +
+            "                              return _vrt_kvo_targetCache[hashKey].targetValue;\n" +
             "                              },\n" +
             "                              set : function(value){\n" +
             "                              var tmpArray;\n" +
-            "                              if(_vrt_kvo_responserCache[hashKey] != undefined)\n" +
+            "                              if(_vrt_kvo_responserCache[repHashKey] != undefined)\n" +
             "                              {\n" +
-            "                              tmpArray = _vrt_kvo_responserCache[hashKey];\n" +
+            "                              tmpArray = _vrt_kvo_responserCache[repHashKey];\n" +
             "                              tmpArray.forEach(element => {\n" +
-            "                                               element.callBack(vrt_kvo_target.target,key,vrt_kvo_target.targetValue,value);\n" +
+            "                                               element.callBack(_vrt_kvo_targetCache[hashKey].target,key,_vrt_kvo_targetCache[hashKey].targetValue,value);\n" +
             "                                               });\n" +
             "                              }\n" +
-            "                              vrt_kvo_target.targetValue = value;\n" +
+            "                              _vrt_kvo_targetCache[hashKey].targetValue = value;\n" +
             "                              }\n" +
             "                              });\n" +
             "    }\n" +
             "    \n" +
-            "    _vrt_kvo_responserCache[hashKey].push(vrt_kvo_responser);\n" +
+            "    _vrt_kvo_responserCache[repHashKey].push(vrt_kvo_responser);\n" +
             "}\n" +
             "\n" +
             "\n" +
@@ -123,7 +126,7 @@ public class Constant {
             "    this.masterView = null;\n" +
             "    this.pendCenterX = null;\n" +
             "    this.pendCenterY = null;\n" +
-            "\n" +
+            "    \n" +
             "    this._resolvePendCenterX = function()\n" +
             "    {\n" +
             "        if(this.pendCenterX != null)\n" +
@@ -131,7 +134,7 @@ public class Constant {
             "            this.masterView._x = this.pendCenterX - this.masterView._width/2.0;\n" +
             "        }\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this._resolvePendCenterY = function()\n" +
             "    {\n" +
             "        if(this.pendCenterY != null)\n" +
@@ -139,15 +142,15 @@ public class Constant {
             "            this.masterView._y = this.pendCenterY - this.masterView._height/2.0;\n" +
             "        }\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.heightIs = function(height){\n" +
-            "        this.masterView._height = height;\n" +
+            "        this.masterView._height = height * _kHeightScale;\n" +
             "        this._resolvePendCenterY();\n" +
             "        return this;\n" +
             "    }\n" +
             "    \n" +
             "    this.widthIs = function(width){\n" +
-            "        this.masterView._width = width;\n" +
+            "        this.masterView._width = width * _kWidthScale;\n" +
             "        this._resolvePendCenterX();\n" +
             "        return this;\n" +
             "    }\n" +
@@ -185,17 +188,17 @@ public class Constant {
             "            view = this.masterView.superView;\n" +
             "        if(this.masterView.superView == view)\n" +
             "            this.pendCenterY = view.height()/2.0;\n" +
-            "        else \n" +
+            "        else\n" +
             "            this.pendCenterY = view.center().y;\n" +
             "        return this;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.centerYIs = function(y)\n" +
             "    {\n" +
-            "        this.pendCenterY = y;\n" +
+            "        this.pendCenterY = y * _kHeightScale;\n" +
             "        return this;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.topEqualToView = function(view){\n" +
             "        if(view == null)\n" +
             "            view = this.masterView.superView;\n" +
@@ -208,6 +211,7 @@ public class Constant {
             "    }\n" +
             "    \n" +
             "    this.topSpaceToView = function(view,space){\n" +
+            "        space = space * _kHeightScale;\n" +
             "        if(view == null)\n" +
             "            view = this.masterView.superView;\n" +
             "        this.pendCenterY = null;\n" +
@@ -217,21 +221,21 @@ public class Constant {
             "            this.masterView._y = space + view.bottom();\n" +
             "        return this;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.centerXEqualToView = function(view)\n" +
             "    {\n" +
             "        if(view == null)\n" +
             "            view = this.masterView.superView;\n" +
             "        if(this.masterView.superView == view)\n" +
             "            this.pendCenterX = view.width()/2.0;\n" +
-            "        else \n" +
+            "        else\n" +
             "            this.pendCenterX = view.center().x;\n" +
             "        return this;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.centerXIs = function(x)\n" +
             "    {\n" +
-            "        this.pendCenterX = x;\n" +
+            "        this.pendCenterX = x * _kWidthScale;\n" +
             "        return this;\n" +
             "    }\n" +
             "    \n" +
@@ -247,6 +251,7 @@ public class Constant {
             "    }\n" +
             "    \n" +
             "    this.leftSpaceToView = function(view,space){\n" +
+            "        space = space * _kWidthScale;\n" +
             "        if(view == null)\n" +
             "            view = this.masterView.superView;\n" +
             "        this.pendCenterX = null;\n" +
@@ -258,7 +263,23 @@ public class Constant {
             "    }\n" +
             "}\n" +
             "\n" +
+            "function _kvo_add_refresh_prop(view,key)\n" +
+            "{\n" +
+            "    vrt_kvo_bind(view,key,function(target,key,oldVlaue,newValue){\n" +
+            "                 api_refreshView(target._vrtId,key,newValue);\n" +
+            "                 });\n" +
+            "}\n" +
             "\n" +
+            "function _registerRefreshView(view)\n" +
+            "{\n" +
+            "    _kvo_add_refresh_prop(view,'_x');\n" +
+            "    _kvo_add_refresh_prop(view,'_y');\n" +
+            "    _kvo_add_refresh_prop(view,'_height');\n" +
+            "    _kvo_add_refresh_prop(view,'_width');\n" +
+            "    \n" +
+            "    _kvo_add_refresh_prop(view,'backgroundColor');\n" +
+            "    _kvo_add_refresh_prop(view,'cornerRadius');\n" +
+            "}\n" +
             "\n" +
             "function View()\n" +
             "{\n" +
@@ -275,19 +296,10 @@ public class Constant {
             "    this.backgroundColor = clearColor;\n" +
             "    this.vrt_layout = new vrt_layout();\n" +
             "    this.vrt_layout.masterView = this;\n" +
-            "\n" +
+            "    \n" +
             "    this.cornerRadius = 0;\n" +
             "    \n" +
-            "    vrt_kvo_bind(this,'backgroundColor',function(target,key,oldVlaue,newValue){\n" +
-            "//                  api_refreshView(target._vrtId,key,value);\n" +
-            "                 //        console.log(\"KVO \" + key + \" old \" + oldVlaue + \" new \" + newValue);\n" +
-            "                 });\n" +
-            "    \n" +
-            "    vrt_kvo_bind(this,'_height',function(target,key,oldVlaue,newValue){\n" +
-            "                //  api_refreshView(target._vrtId,key,value);\n" +
-            "                 //        console.log(\"KVO \" + key + \" old \" + oldVlaue + \" new \" + newValue);\n" +
-            "                 });\n" +
-            "    \n" +
+            "    _registerRefreshView(this);\n" +
             "    \n" +
             "    this._setFrame = function(x,y,width,height)\n" +
             "    {\n" +
@@ -296,10 +308,11 @@ public class Constant {
             "        this._width = width;\n" +
             "        this._height = height;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.addClick = function(view,func)\n" +
             "    {\n" +
             "        addCallBack(view._vrtId,func);\n" +
+            "        api_addViewClick(view._vrtId);\n" +
             "    }\n" +
             "    \n" +
             "    this.addSubView = function(subView){\n" +
@@ -355,15 +368,21 @@ public class Constant {
             "    }\n" +
             "}\n" +
             "\n" +
+            "\n" +
             "function ViewController()\n" +
             "{\n" +
             "    this._vrtId = -1;\n" +
             "    this.view = new View();\n" +
-            "    this.view._setFrame(0,0,375,554);//667 full screen  554 with Navigation Bar & Tab Bar\n" +
+            "    this.view._setFrame(0,0,api_getBaseViewWidth() * 1,api_getBaseViewHeight(true,true) * 1);//667 full screen  554 with Navigation Bar & Tab Bar\n" +
+            "    _kHeightScale = this.view._height/667.0;\n" +
+            "    _kWidthScale = this.view._width/375.0;\n" +
+            "    _kFontScale = _kWidthScale;\n" +
             "    this.view.backgroundColor = whiteColor;\n" +
             "    this.view.superView = null;\n" +
             "    this._clsName = 'ViewController';\n" +
             "    this.title = \"title\";\n" +
+            "    \n" +
+            "    _kvo_add_refresh_prop(this,'title');\n" +
             "    \n" +
             "    this.addCallBackViewDidLoad = function(func){\n" +
             "        addCallBack(this._vrtId + \"CallBackViewDidLoad\",func);\n" +
@@ -386,20 +405,24 @@ public class Constant {
             "function Label()\n" +
             "{\n" +
             "    View.call(this);\n" +
-            "    this.control = null;\n" +
             "    this._clsName = 'Label';\n" +
             "    this.text = '';\n" +
-            "    this.fontSize = 12;\n" +
+            "    this.fontSize = 12 * _kFontScale;\n" +
             "    this.textColor = blackColor;\n" +
             "    this.numberOfLines = 1;\n" +
+            "    \n" +
+            "    _kvo_add_refresh_prop(this,'text');\n" +
+            "    _kvo_add_refresh_prop(this,'fontSize');\n" +
+            "    _kvo_add_refresh_prop(this,'textColor');\n" +
+            "    _kvo_add_refresh_prop(this,'numberOfLines');\n" +
             "}\n" +
             "\n" +
             "function ImgView()\n" +
             "{\n" +
             "    View.call(this);\n" +
             "    this._clsName = 'ImgView';\n" +
-            "    this.control = null;\n" +
             "    this.imageUrl = null;\n" +
+            "    _kvo_add_refresh_prop(this,'imageUrl');\n" +
             "}\n" +
             "\n" +
             "function List()\n" +
@@ -414,21 +437,26 @@ public class Constant {
             "    {\n" +
             "        this._cell[section] = Celltmp;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.setDataSourceAtSection = function(section,data)\n" +
             "    {\n" +
             "        this._dataSource[section] = data;\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.addCallBackDidSelectRowAtIndexPath = function(func)\n" +
             "    {\n" +
             "        addCallBack(this._vrtId + \"CallBackDidSelectRowAtIndexPath\",func);\n" +
             "    }\n" +
-            "\n" +
+            "    \n" +
             "    this.reloadData = function()\n" +
             "    {\n" +
             "        api_refreshList(this._vrtId);\n" +
             "    }\n" +
+            "}\n" +
+            "\n" +
+            "function bindKey(key)\n" +
+            "{\n" +
+            "    return \"bindKey:\" + key;\n" +
             "}\n" +
             "\n" +
             "function Cell()\n" +
@@ -446,28 +474,44 @@ public class Constant {
             "    View.call(this);\n" +
             "    this._clsName = \"TextField\";\n" +
             "    this.text = \"\";\n" +
-            "    this.fontSize = 12;\n" +
+            "    this.fontSize = 12 * _kFontScale;\n" +
             "    this.textColor = blackColor;\n" +
-            "\n" +
+            "    \n" +
+            "    _kvo_add_refresh_prop(this,'text');\n" +
+            "    _kvo_add_refresh_prop(this,'fontSize');\n" +
+            "    _kvo_add_refresh_prop(this,'textColor');\n" +
+            "    \n" +
             "    this.addCallBackDidReturn = function(func)\n" +
             "    {\n" +
             "        addCallBack(this._vrtId + \"CallBackDidReturn\",func);\n" +
             "    }\n" +
             "}\n" +
             "\n" +
-            "function commitVC(vc)\n" +
+            "\n" +
+            "var _vrt_httpRqe_Cache = {};\n" +
+            "//原型func(json data,string info)\n" +
+            "function HttpRequest(url,func)\n" +
             "{\n" +
-            "    var platform = api_platform();\n" +
-            "    //var platform = \"iOS\";\n" +
+            "    this.url = url;\n" +
+            "    this._param = {};\n" +
             "    \n" +
-            "    if(platform == \"iOS\")\n" +
+            "    this.request = function(param)\n" +
             "    {\n" +
-            "        api_commitVC(vc);\n" +
+            "        if(param == null)\n" +
+            "            this._param = {};\n" +
+            "        else\n" +
+            "            this._param = param;\n" +
+            "        api_httpRequest(this);\n" +
             "    }\n" +
-            "    else if(platform == \"Android\")\n" +
+            "    _vrt_httpRqe_Cache[url] = func;\n" +
+            "}\n" +
+            "\n" +
+            "function _api_httpResponse(url,data,info)\n" +
+            "{\n" +
+            "    var httpReqFunc = _vrt_httpRqe_Cache[url];\n" +
+            "    if(httpReqFunc)\n" +
             "    {\n" +
-            "        \n" +
-            "        api_commitVC(vc);\n" +
+            "        httpReqFunc(data,info);\n" +
             "    }\n" +
             "}";
 
@@ -551,11 +595,16 @@ public class Constant {
             "}\n" +
             "\n" +
             "//刷新view\n" +
-            "var method_Api_refreshView = ScriptAPI.getMethod(\"api_refreshView\",[java.lang.String],[java.lang.String],[java.lang.String])\n" +
+            "var method_Api_refreshView = ScriptAPI.getMethod(\"api_refreshView\",[java.lang.String])\n" +
             "function api_refreshView(vrtId, key, newValue){\n" +
             "    var jsonStr = JSON.stringify(newValue)\n" +
-            "    method_Api_refreshView.invoke(javaContext,vrtId,key,jsonStr)\n" +
-            "}\n" +
+            "    var array = java.lang.reflect.Array.newInstance(java.lang.String, 3);\n" +
+            "    array[0] = vrtId;\n" +
+            "    array[1] = key;\n" +
+            "    array[2] = jsonStr;\n" +
+            "    var jsonArray = java.util.Arrays.toString(array)\n" +
+            "    method_Api_refreshView.invoke(javaContext,jsonArray)\n" +
+            "}"+
             "\n" +
             "//网络请求\n" +
             "var method_Api_httpRequest = ScriptAPI.getMethod(\"api_httpRequest\",[java.lang.String])\n" +
@@ -564,7 +613,11 @@ public class Constant {
             "    method_Api_httpRequest.invoke(javaContext,jsonStr)\n" +
             "}\n" +
             "\n" +
-            "\n";
+            "//点击回调\n" +
+            "var method_Api_addViewClick = ScriptAPI.getMethod(\"api_addViewClick\",[java.lang.String])\n" +
+            "function api_addViewClick(vrtId){\n" +
+            "    method_Api_addViewClick.invoke(javaContext,vrtId+\"\")\n" +
+            "}\n";
 
     public static final String JS_CODE_TEST = "function model4Test()\n" +
             "{\n" +
@@ -583,29 +636,29 @@ public class Constant {
             "//创建唯一的视图控制器\n" +
             "var mainVC = new ViewController();\n" +
             "\n" +
-            "mainVC.view._setFrame(0,0,api_getBaseViewWidth()*1,api_getBaseViewHeight()*1);\n"+
+            "\n" +
             "\n" +
             "//在视图不同阶段添加回调\n" +
             "mainVC.addCallBackViewDidLoad(function(){\n" +
-            "    api_log(\"view did load\");\n" +
-            "});\n" +
+            "                              // api_log(\"view did load\");\n" +
+            "                              });\n" +
             "mainVC.addCallBackViewWillAppear(function(){\n" +
-            "    api_log(\"view will appear\");\n" +
-            "});\n" +
+            "                                 // api_log(\"view will appear\");\n" +
+            "                                 });\n" +
             "mainVC.addCallBackViewDidAppear(function(){\n" +
-            "    api_log(\"view did appear\");\n" +
-            "});\n" +
+            "                                // api_log(\"view did appear\");\n" +
+            "                                });\n" +
             "mainVC.addCallBackViewWillDisappear(function(){\n" +
-            "    api_log(\"view will disappear\");\n" +
-            "});\n" +
+            "                                    // api_log(\"view will disappear\");\n" +
+            "                                    });\n" +
             "\n" +
             "//创建一个列表视图\n" +
             "var list = new List();\n" +
             "\n" +
             "//添加列表中cell的点击回调\n" +
             "list.addCallBackDidSelectRowAtIndexPath(function(section,row){\n" +
-            "    api_log(\" did select section : \" + section + \" row : \" + row);\n" +
-            "});\n" +
+            "                                        api_log(\" did select section : \" + section + \" row : \" + row);\n" +
+            "                                        });\n" +
             "\n" +
             "mainVC.view.addSubView(list);\n" +
             "list.vrt_layout.topEqualToView(null).leftEqualToView(null).heightRatioToView(null,0.5).widthRatioToView(null,1);\n" +
@@ -624,7 +677,7 @@ public class Constant {
             "//创建一个文本显示视图\n" +
             "var label1 = new Label();\n" +
             "//因为该视图是放在cell模版中的、需要bind一个model中的key\n" +
-            "label1.text = \"bindKey:userName\";\n" +
+            "label1.text = bindKey(\"userName\");\n" +
             "label1.textColor = redColor;\n" +
             "label1.fontSize = 18;\n" +
             "cell.addSubView(label1);\n" +
@@ -635,15 +688,23 @@ public class Constant {
             "//设置list的数据源\n" +
             "list.setDataSourceAtSection(0,dataSource);\n" +
             "\n" +
+            "\n" +
+            "var basicUrl = \"http://dyba.xuebaeasy.com:8090/\";\n" +
+            "//创建一个http请求器\n" +
+            "var reqTest = new HttpRequest(basicUrl + \"user/loginToApp\",function(data,info){\n" +
+            "                              api_log(data.msg);\n" +
+            "                              })\n" +
+            "\n" +
             "//创建一个基本的视图、\n" +
             "var view4testClick = new View();\n" +
             "view4testClick.backgroundColor = redColor;\n" +
             "mainVC.view.addSubView(view4testClick);\n" +
-            "view4testClick.vrt_layout.topSpaceToView(list,15).centerXEqualToView(null).heightIs(30).widthIs(100);\n" +
+            "view4testClick.vrt_layout.topSpaceToView(list,15).centerXEqualToView(null).heightIs(30).widthEqualToHeight();\n" +
             "//为该视图增加一个点击事件的回调\n" +
             "view4testClick.addClick(view4testClick,function(){\n" +
-            "    api_log(\"control test\");\n" +
-            "});\n" +
+            "                        reqTest.request({\"userPhone\":\"\",\"userPassword\":\"\"});\n" +
+            "                        textField.text = \"OK\";\n" +
+            "                        });\n" +
             "\n" +
             "//创建一个文本输入视图\n" +
             "var textField = new TextField();\n" +
@@ -653,8 +714,8 @@ public class Constant {
             "mainVC.view.addSubView(textField);\n" +
             "textField.vrt_layout.topSpaceToView(list,15).leftSpaceToView(view4testClick,10).heightIs(30).widthIs(100);\n" +
             "textField.addCallBackDidReturn(function(text){\n" +
-            "    api_log(\"user input text: \" + text);\n" +
-            "});\n" +
+            "                               api_log(\"user input text: \" + text);\n" +
+            "                               });\n" +
             "//提交这个视图控制器\n" +
-            "commitVC(mainVC);";
+            "api_commitVC(mainVC);";
 }

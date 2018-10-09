@@ -1,10 +1,7 @@
 package com.jzycc.android_vrt.model;
 
-import com.jzycc.android_vrt.Ob;
-
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jzy
@@ -23,7 +20,7 @@ public class VrtViewData {
 
     //EditView TextField Label
     private String text;
-    private Integer fontSize;
+    private Float fontSize;
     private VrtColor textColor;
     private Integer numberOfLines;
     //ImageView
@@ -112,11 +109,11 @@ public class VrtViewData {
         this.text = text;
     }
 
-    public Integer getFontSize() {
+    public Float getFontSize() {
         return fontSize;
     }
 
-    public void setFontSize(Integer fontSize) {
+    public void setFontSize(Float fontSize) {
         this.fontSize = fontSize;
     }
 

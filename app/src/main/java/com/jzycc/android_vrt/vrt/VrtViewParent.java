@@ -5,12 +5,13 @@ import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.jzycc.android_vrt.model.VrtViewData;
+import com.jzycc.android_vrt.utils.ViewClickUtils;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
+import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +23,13 @@ import java.util.List;
 public class VrtViewParent extends FrameLayout{
     private VrtViewData vc;
     private List<Point> points = new ArrayList<>();
+    private VRTSdkManager vrtSdkManager;
     private VrtViewRenderHelper vrtViewRenderHelper;
 
     public VrtViewParent(@NonNull Context context,VrtViewData vc) {
         super(context);
         this.vc = vc;
+        vrtSdkManager = VRTSdkManager.getInstance();
         initThis();
     }
 
@@ -45,14 +48,15 @@ public class VrtViewParent extends FrameLayout{
         final int childCount = getChildCount();
         for(int i = 0 ;i < childCount; i++){
             View child = getChildAt(i);
-            Log.i("jzy111", "onLayout: "+points.get(i).x+","+points.get(i).y);
             child.layout(points.get(i).x,points.get(i).y,points.get(i).x+getChildAt(i).getWidth(),points.get(i).y+getChildAt(i).getHeight());
         }
     }
 
     private void initThis() {
-        vrtViewRenderHelper = new VrtViewRenderHelper(this,vc);
+        //判断是否需要添加监听
+        ViewClickUtils.setClickListenerForView(this,vrtSdkManager.getVRTClickableManager().getVrtIds(),vc.get_vrtId());
 
+        vrtViewRenderHelper = new VrtViewRenderHelper(this);
         if(vc!=null){
             for(VrtViewData vrtView:vc.getSubViews()){
                 switch (vrtView.get_clsName()){

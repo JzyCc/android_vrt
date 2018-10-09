@@ -2,7 +2,7 @@ package com.jzycc.android_vrt;
 
 import android.app.Application;
 
-import com.jzycc.android_vrt.vrt.VrtSdkManager;
+import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
 
 /**
  * @author : Jzy
@@ -10,13 +10,12 @@ import com.jzycc.android_vrt.vrt.VrtSdkManager;
  */
 public class MyApplication extends Application{
 
-    private VrtSdkManager vrtSdkManager;
+    private VRTSdkManager vrtSdkManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        vrtSdkManager = VrtSdkManager.getInstance();
-
+        vrtSdkManager = VRTSdkManager.getInstance();
         vrtSdkManager.registerImageLoadAdapter(new ImageViewLoadAdapter());
     }
 }

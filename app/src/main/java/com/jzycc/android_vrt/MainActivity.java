@@ -2,17 +2,17 @@ package com.jzycc.android_vrt;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import com.jzycc.android_vrt.vrt_js.Constant;
-import com.jzycc.android_vrt.vrt_js.JsEngine;
-import com.jzycc.android_vrt.vrt_js.VrtRenderListener;
+import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
+import com.jzycc.android_vrt.vrt_js.VRTRenderListener;
 
-public class MainActivity extends AppCompatActivity implements VrtRenderListener {
+public class MainActivity extends AppCompatActivity implements VRTRenderListener {
 
-    private JsEngine jsEngine;
+    private VRTJsEngine VRTJsEngine;
+    private FrameLayout frameLayout;
 
     private static final String JS_CALL_JAVA_FUNCTION =
             "var ScriptAPI = java.lang.Class.forName(\"" + MainActivity.class.getName() + "\", true, javaLoader);" +
@@ -29,19 +29,18 @@ public class MainActivity extends AppCompatActivity implements VrtRenderListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-        TextView textView = (TextView)findViewById(R.id.tv_text);
+        VRTJsEngine = new VRTJsEngine(this);
+        frameLayout = (FrameLayout)findViewById(R.id.fl_layout);
+        VRTJsEngine.requestRenderInParent(frameLayout);
 
-        jsEngine = new JsEngine(this,this.getWindowManager());
-
-        String json = jsEngine.runScript(JsEngine.API_COMMITVC,new Object[]{});
 
     }
 
     @Override
     public void renderSuccess(View view) {
-        setContentView(view);
+        frameLayout.addView(view);
     }
 
     @Override

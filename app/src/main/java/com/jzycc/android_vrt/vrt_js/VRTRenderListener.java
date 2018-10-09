@@ -4,8 +4,10 @@ import android.view.View;
 
 /**
  * @author Jzy
- * created by 2018/10/6
+ * created by 2018/10/5
  */
-public interface VrtViewListener {
+public interface VRTRenderListener {
+    void renderSuccess(View view);
+
     void setImageByUrl(View imageView, String imageUrl);
 }
