@@ -18,10 +18,8 @@ public class VRTSdkManager {
 
     private List<VRTJsEngine> VRTJsEngine = new ArrayList<>();
     private IVRTImageLoadAdapter IVRTImageLoadAdapter;
-    private VRTClickableManager VRTClickableManager;
 
     public VRTSdkManager() {
-        VRTClickableManager = new VRTClickableManager();
     }
 
     public static VRTSdkManager getInstance(){
@@ -41,13 +39,6 @@ public class VRTSdkManager {
 
     public IVRTImageLoadAdapter getIVRTImageLoadAdapter() {
         return IVRTImageLoadAdapter;
-    }
-
-    public VRTClickableManager getVRTClickableManager() {
-        return VRTClickableManager;
-    }
-
-    public void requestRender(Context mContext){
     }
 
 }

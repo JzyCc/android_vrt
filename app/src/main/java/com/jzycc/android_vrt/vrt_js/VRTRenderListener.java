@@ -8,6 +8,4 @@ import android.view.View;
  */
 public interface VRTRenderListener {
     void renderSuccess(View view);
-
-    void setImageByUrl(View imageView, String imageUrl);
 }

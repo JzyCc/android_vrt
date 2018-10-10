@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.jzycc.android_vrt.vrt_js.Constant;
+import com.jzycc.android_vrt.vrt_js.constant.Constant;
 import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
 import com.jzycc.android_vrt.vrt_js.VRTRenderListener;
 
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity implements VRTRenderListener
     }
 
     @Override
-    public void setImageByUrl(View imageView, String imageUrl) {
-
+    protected void onStart() {
+        super.onStart();
+        VRTJsEngine.onStart();
     }
-
 }

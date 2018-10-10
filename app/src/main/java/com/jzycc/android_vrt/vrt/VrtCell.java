@@ -10,7 +10,9 @@ import android.widget.FrameLayout;
 
 import com.google.gson.Gson;
 import com.jzycc.android_vrt.model.VrtViewData;
+import com.jzycc.android_vrt.vrt.constant.VrtComponentType;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
+import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +29,18 @@ public class VrtCell extends FrameLayout{
     private int position;
     private int type;
     private HashMap<String,Object> data = new HashMap<>();
+    private VRTJsManager vrtJsManager;
 
-    public VrtCell(@NonNull Context context,VrtViewData cell,Object data) {
+
+    public VrtCell(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData cell, Object data,int type, int position) {
         super(context);
         this.cell = cell;
         Gson gson = new Gson();
         String jsonStr = gson.toJson(data);
         this.data = gson.fromJson(jsonStr,HashMap.class);
+        this.vrtJsManager = vrtJsManager;
+        this.type = type;
+        this.position = position;
         initThis();
     }
 
@@ -56,7 +63,8 @@ public class VrtCell extends FrameLayout{
     }
 
     private void initThis(){
-        vrtViewRenderHelper = new VrtViewRenderHelper(this);
+        vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager,type,position);
+        vrtJsManager.setClickListenerForCell(this,cell.get_vrtId(),type,position);
         setBackgroundColor(vrtViewRenderHelper.getColor(cell.getBackgroundColor()));
         if(cell!=null){
             for(VrtViewData vrtView:cell.getSubViews()){

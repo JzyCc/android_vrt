@@ -9,9 +9,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.jzycc.android_vrt.model.VrtViewData;
-import com.jzycc.android_vrt.utils.ViewClickUtils;
+import com.jzycc.android_vrt.vrt.constant.VrtComponentType;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
+import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +26,12 @@ public class VrtViewParent extends FrameLayout{
     private List<Point> points = new ArrayList<>();
     private VRTSdkManager vrtSdkManager;
     private VrtViewRenderHelper vrtViewRenderHelper;
+    private VRTJsManager vrtJsManager;
 
-    public VrtViewParent(@NonNull Context context,VrtViewData vc) {
+    public VrtViewParent(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData vc) {
         super(context);
         this.vc = vc;
+        this.vrtJsManager = vrtJsManager;
         vrtSdkManager = VRTSdkManager.getInstance();
         initThis();
     }
@@ -54,9 +57,8 @@ public class VrtViewParent extends FrameLayout{
 
     private void initThis() {
         //判断是否需要添加监听
-        ViewClickUtils.setClickListenerForView(this,vrtSdkManager.getVRTClickableManager().getVrtIds(),vc.get_vrtId());
-
-        vrtViewRenderHelper = new VrtViewRenderHelper(this);
+        vrtJsManager.setClickListenerForView(this,vc.get_vrtId());
+        vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager);
         if(vc!=null){
             for(VrtViewData vrtView:vc.getSubViews()){
                 switch (vrtView.get_clsName()){

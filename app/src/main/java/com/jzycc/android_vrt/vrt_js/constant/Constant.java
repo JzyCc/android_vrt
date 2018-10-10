@@ -1,4 +1,4 @@
-package com.jzycc.android_vrt.vrt_js;
+package com.jzycc.android_vrt.vrt_js.constant;
 
 /**
  * author Jzy(Xiaohuntun)

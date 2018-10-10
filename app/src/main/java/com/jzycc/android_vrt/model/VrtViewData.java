@@ -26,8 +26,8 @@ public class VrtViewData {
     //ImageView
     private String imageUrl;
     //Item
-    private HashMap<String,VrtViewData> _cell;
-    private HashMap<String, List<Object>> _dataSource;
+    private HashMap<Integer,VrtViewData> _cell;
+    private HashMap<Integer, List<Object>> _dataSource;
 
     public String get_vrtId() {
         return _vrtId;
@@ -141,19 +141,19 @@ public class VrtViewData {
         this.imageUrl = imageUrl;
     }
 
-    public HashMap<String, VrtViewData> get_cell() {
+    public HashMap<Integer, VrtViewData> get_cell() {
         return _cell;
     }
 
-    public void set_cell(HashMap<String, VrtViewData> _cell) {
+    public void set_cell(HashMap<Integer, VrtViewData> _cell) {
         this._cell = _cell;
     }
 
-    public HashMap<String, List<Object>> get_dataSource() {
+    public HashMap<Integer, List<Object>> get_dataSource() {
         return _dataSource;
     }
 
-    public void set_dataSource(HashMap<String, List<Object>> _dataSource) {
+    public void set_dataSource(HashMap<Integer, List<Object>> _dataSource) {
         this._dataSource = _dataSource;
     }
 }

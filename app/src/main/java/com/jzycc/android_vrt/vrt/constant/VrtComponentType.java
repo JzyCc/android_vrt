@@ -1,4 +1,4 @@
-package com.jzycc.android_vrt.vrt;
+package com.jzycc.android_vrt.vrt.constant;
 
 /**
  * @author Jzy
