@@ -597,13 +597,19 @@ public class Constant {
             "//刷新view\n" +
             "var method_Api_refreshView = ScriptAPI.getMethod(\"api_refreshView\",[java.lang.String])\n" +
             "function api_refreshView(vrtId, key, newValue){\n" +
-            "    var jsonStr = JSON.stringify(newValue)\n" +
-            "    var array = java.lang.reflect.Array.newInstance(java.lang.String, 3);\n" +
-            "    array[0] = vrtId;\n" +
-            "    array[1] = key;\n" +
-            "    array[2] = jsonStr;\n" +
-            "    var jsonArray = java.util.Arrays.toString(array)\n" +
-            "    method_Api_refreshView.invoke(javaContext,jsonArray)\n" +
+            "    var refreshModel = new RefreshModel();\n" +
+            "    refreshModel._vrtId = vrtId;\n" +
+            "    refreshModel._key = key;\n" +
+            "    refreshModel._newValue = newValue;\n" +
+            "    \n" +
+            "    var jsonStr = JSON.stringify(refreshModel)\n" +
+            "    method_Api_refreshView.invoke(javaContext,jsonStr)\n" +
+            "}\n" +
+            "\n" +
+            "function RefreshModel(){\n" +
+            "    var _vrtId;\n" +
+            "    var _key;\n" +
+            "    var _newValue;\n" +
             "}"+
             "\n" +
             "//网络请求\n" +

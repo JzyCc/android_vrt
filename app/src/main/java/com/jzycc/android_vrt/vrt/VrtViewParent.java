@@ -56,6 +56,8 @@ public class VrtViewParent extends FrameLayout{
     }
 
     private void initThis() {
+        //保存对象
+        vrtJsManager.getViewMap().put(vc.get_vrtId(),this);
         //判断是否需要添加监听
         vrtJsManager.setClickListenerForView(this,vc.get_vrtId());
         vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager);

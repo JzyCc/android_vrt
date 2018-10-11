@@ -24,6 +24,7 @@ import java.util.HashMap;
 /**
  * @author Jzy
  * created by 2018/10/8
+ *
  */
 public class VrtViewRenderHelper implements VrtViewRenderService{
 
@@ -56,6 +57,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         if(!TextUtils.isEmpty(textView.getText())){
             textView.setText(vrtView.getText());
         }
+        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),textView);
         vrtJsManager.setClickListenerForView(textView,vrtView.get_vrtId());
         parent.addView(textView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
@@ -73,6 +75,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     @Override
     public void setImageView(VrtViewData vrtView){
         ImageView imageView = initImageView(vrtView);
+        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),imageView);
         vrtJsManager.setClickListenerForView(imageView,vrtView.get_vrtId());
         parent.addView(imageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
@@ -103,6 +106,8 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     public void setEditText(VrtViewData vrtView){
         EditText editText = initEditText(vrtView);
         editText.setText(vrtView.getText());
+        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),editText);
+        vrtJsManager.setClickListenerForView(editText,vrtView.get_vrtId());
         parent.addView(editText,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
@@ -116,6 +121,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     @Override
     public void setRecyclerView(VrtViewData vrtView){
         RecyclerView recyclerView = initRecyclerView(vrtView);
+        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
         parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
@@ -131,7 +137,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
      * @return int
      * get tht int value of the color by the argb value
      */
-    public int getColor(VrtColor vrtColor){
+    public static int getColor(VrtColor vrtColor){
         if(vrtColor!=null){
             return Color.argb(vrtColor.getW(),vrtColor.getX(),vrtColor.getY(),vrtColor.getZ());
         }
@@ -180,6 +186,10 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         if(vrtView.getBackgroundColor() != null){
             editText.setBackgroundColor(getColor(vrtView.getBackgroundColor()));
         }
+        if(vrtView.getNumberOfLines()!=null){
+            editText.setMaxLines(vrtView.getNumberOfLines());
+        }
+        editText.setPadding(10,5,10,5);
         return editText;
     }
 

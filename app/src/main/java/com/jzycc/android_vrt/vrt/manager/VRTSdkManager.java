@@ -16,7 +16,6 @@ public class VRTSdkManager {
 
     private static volatile VRTSdkManager vrtSdkManager;
 
-    private List<VRTJsEngine> VRTJsEngine = new ArrayList<>();
     private IVRTImageLoadAdapter IVRTImageLoadAdapter;
 
     public VRTSdkManager() {

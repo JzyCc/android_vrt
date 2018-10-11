@@ -9,6 +9,8 @@ import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.jzycc.android_vrt.model.ViewController;
+import com.jzycc.android_vrt.model.VrtRefreshMsg;
+import com.jzycc.android_vrt.model.VrtRequestBody;
 import com.jzycc.android_vrt.utils.CalculateUtils;
 import com.jzycc.android_vrt.vrt.VrtViewParent;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
@@ -21,9 +23,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * author Jzy(Xiaohuntun)
@@ -47,6 +47,7 @@ public class VRTJsEngine implements VRTLifeCycle{
     private org.mozilla.javascript.Context rhino;
     private Scriptable scope;
     private String vcJsCode = Constant.JAVA_CALL_JS_FUNCTION;
+    private Gson gson;
 
     private VRTJsManager vrtJsManager;
 
@@ -56,8 +57,9 @@ public class VRTJsEngine implements VRTLifeCycle{
         this.VRTRenderListener = (VRTRenderListener)mContext;
         this.vrtSdkManager = VRTSdkManager.getInstance();
         this.vrtViewManager = new VRTViewManager(new HashMap<String, View>());
-        this.vrtJsManager = new VRTJsManager(this);
+        this.vrtJsManager = new VRTJsManager(mContext,this);
         windowManager = mContext.getWindowManager();
+        this.gson = new Gson();
         initJSStr();
     }
 
@@ -85,14 +87,18 @@ public class VRTJsEngine implements VRTLifeCycle{
         rhino = org.mozilla.javascript.Context.enter();
         rhino.setOptimizationLevel(-1);
 
-        scope = rhino.initStandardObjects();
+        try{
+            scope = rhino.initStandardObjects();
 
-        ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(this,scope));
-        ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(clazz.getClassLoader(),scope));
+            ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(this,scope));
+            ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(clazz.getClassLoader(),scope));
 
-        Object x = rhino.evaluateString(scope, allFunctions, clazz.getSimpleName(), 1, null);
-        isRender = true;
-        callBackViewDidLoad();
+            Object x = rhino.evaluateString(scope, allFunctions, clazz.getSimpleName(), 1, null);
+            isRender = true;
+            callBackViewDidLoad();
+        }finally {
+
+        }
     }
 
     public int  api_getBaseViewWidth(){
@@ -116,19 +122,23 @@ public class VRTJsEngine implements VRTLifeCycle{
     }
 
     public void api_commitVC4Android(String jsonStr){
-        Gson gson = new Gson();
         vc = gson.fromJson(jsonStr, ViewController.class);
         setViewController(vc);
         Log.i("jzy111", "api_commitVC4Android: "+jsonStr);
     }
 
-    public void api_refreshView(String array){
-        Log.i("jzy111", "api_refreshView: "+array);
+    public void api_refreshView(String refreshMsg){
+        if(isRender){
+            VrtRefreshMsg vrtRefreshMsg = gson.fromJson(refreshMsg,VrtRefreshMsg.class);
+            vrtJsManager.refreshView(vrtRefreshMsg.get_vrtId(),vrtRefreshMsg.get_key(),vrtRefreshMsg.get_newValue());
+        }
 
     }
 
-    public void api_httpRequest(String  jsReponse){
-        Log.i("jzy111", "api_httpRequest: "+jsReponse);
+    public void api_httpRequest(String  jsObjectJsonStr){
+        VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
+        vrtJsManager.callbackHttpRequestForJs(vrtRequestBody.getUrl(),vrtRequestBody.get_param());
+        Log.i("jzy111", "api_httpRequest: "+jsObjectJsonStr);
     }
 
     public void api_addViewClick(String vrtId){
