@@ -1,12 +1,14 @@
 package com.jzycc.android_vrt.model;
 
+import java.util.HashMap;
+
 /**
  * @author : Jzy
  * date   : 18-10-11
  */
 public class VrtRequestBody {
     private String url;
-    private String _param;
+    private HashMap<String,Object> _param;
 
     public String getUrl() {
         return url;
@@ -16,11 +18,11 @@ public class VrtRequestBody {
         this.url = url;
     }
 
-    public String get_param() {
+    public HashMap<String, Object> get_param() {
         return _param;
     }
 
-    public void set_param(String _param) {
+    public void set_param(HashMap<String, Object> _param) {
         this._param = _param;
     }
 }

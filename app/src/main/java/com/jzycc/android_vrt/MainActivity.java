@@ -1,13 +1,22 @@
 package com.jzycc.android_vrt;
 
+import android.content.Context;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.jzycc.android_vrt.utils.FileUtils;
 import com.jzycc.android_vrt.vrt_js.constant.Constant;
 import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
 import com.jzycc.android_vrt.vrt_js.VRTRenderListener;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity implements VRTRenderListener {
 
@@ -33,9 +42,7 @@ public class MainActivity extends AppCompatActivity implements VRTRenderListener
 
         VRTJsEngine = new VRTJsEngine(this);
         frameLayout = (FrameLayout)findViewById(R.id.fl_layout);
-        VRTJsEngine.requestRenderInParent(frameLayout);
-
-
+        VRTJsEngine.requestRenderByFile("123");
     }
 
     @Override

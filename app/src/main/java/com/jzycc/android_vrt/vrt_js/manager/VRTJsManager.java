@@ -1,6 +1,8 @@
 package com.jzycc.android_vrt.vrt_js.manager;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.jzycc.android_vrt.model.VrtColor;
 import com.jzycc.android_vrt.model.VrtRequestBody;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
@@ -19,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,13 +40,17 @@ public class VRTJsManager {
     private VRTSdkManager vrtSdkManager;
     private Context mContext;
     private VRTOkHttpManager vrtOkHttpManager;
+    private Gson gson;
+    private Activity activity;
 
 
     public VRTJsManager(Context context,VRTJsEngine vrtJsEngine) {
         this.vrtJsEngine = vrtJsEngine;
         this.mContext = context;
+        this.activity = (Activity)context;
         vrtSdkManager = VRTSdkManager.getInstance();
         vrtOkHttpManager = VRTOkHttpManager.getInstance();
+        this.gson = new Gson();
     }
 
     private List<String> clickableViewVrtIds = new ArrayList<>();
@@ -154,7 +162,8 @@ public class VRTJsManager {
         }
     }
 
-    public void callbackHttpRequestForJs(final String url, String json){
+    public void callbackHttpRequestForJs(final String url, Object dataMap){
+        String json = gson.toJson(dataMap);
         vrtOkHttpManager.getClient().newCall(VRTOkHttpManager.getHttpRequest(url,json)).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -162,8 +171,24 @@ public class VRTJsManager {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                //vrtJsEngine.callFunction(FunctionName.API_HTTP_RESPONSE,new Object[]{url,});
+            public void onResponse(Call call, final Response response) throws IOException {
+
+                if(Looper.getMainLooper().getThread() == Thread.currentThread()){
+                }else {
+                    Log.i(TAG, "onResponse: "+"is not currentThread");
+                    Map map = new HashMap();
+                    map = gson.fromJson(response.body().string(),HashMap.class);
+                    final Map reponseMap = map;
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "onResponse: "+reponseMap);
+                            vrtJsEngine.callFunction(FunctionName.API_HTTP_RESPONSE,new Object[]{url,reponseMap,""});
+                        }
+                    });
+                }
+
+
             }
         });
     }

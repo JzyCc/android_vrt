@@ -2,6 +2,7 @@ package com.jzycc.android_vrt.vrt_js;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import com.jzycc.android_vrt.model.ViewController;
 import com.jzycc.android_vrt.model.VrtRefreshMsg;
 import com.jzycc.android_vrt.model.VrtRequestBody;
 import com.jzycc.android_vrt.utils.CalculateUtils;
+import com.jzycc.android_vrt.utils.FileUtils;
 import com.jzycc.android_vrt.vrt.VrtViewParent;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
 import com.jzycc.android_vrt.vrt.manager.VRTViewManager;
@@ -23,6 +25,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import java.io.File;
 import java.util.HashMap;
 
 /**
@@ -30,6 +33,9 @@ import java.util.HashMap;
  * date 18-9-26
  */
 public class VRTJsEngine implements VRTLifeCycle{
+
+    private static final String TAG = "VRTJsEngine";
+
     private Context mContext;
     private Class clazz;
     private String allFunctions = "";
@@ -78,12 +84,12 @@ public class VRTJsEngine implements VRTLifeCycle{
             public void run() {
                 viewWidth = parent.getMeasuredWidth();
                 viewHeight = parent.getMeasuredHeight();
-                requestRender();
+                requestRender(allFunctions);
             }
         });
     }
 
-    public void requestRender(){
+    public void requestRender(String jsCode){
         rhino = org.mozilla.javascript.Context.enter();
         rhino.setOptimizationLevel(-1);
 
@@ -92,12 +98,32 @@ public class VRTJsEngine implements VRTLifeCycle{
 
             ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(this,scope));
             ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(clazz.getClassLoader(),scope));
-
             Object x = rhino.evaluateString(scope, allFunctions, clazz.getSimpleName(), 1, null);
             isRender = true;
             callBackViewDidLoad();
         }finally {
 
+        }
+    }
+
+    /**
+     * @param fileName
+     */
+    public void requestRenderByFile(String fileName){
+        String vrtJsCode = Constant.JS_CODE_TEST;
+        //String vrtJsCode = FileUtils.FiletoString(mContext, fileName);
+        if(TextUtils.isEmpty(vrtJsCode)){
+            Log.w(TAG, "requestRenderByFile: the file does not exist or get file faield");
+        }else {
+            String vrtjsAndroidFunction = FileUtils.FiletoString(mContext,"VRTJSAndroidFunction.js");
+            String vrtJsFrameworkCode = FileUtils.FiletoString(mContext,"VRTJSFramework.js");
+
+            String result = "var ScriptAPI = java.lang.Class.forName(\"" + VRTJsEngine.class.getName() + "\", true, javaLoader);\n" +
+                    vrtjsAndroidFunction+
+                    vrtJsFrameworkCode+
+                    vrtJsCode;
+
+            requestRender(result);
         }
     }
 
@@ -138,7 +164,7 @@ public class VRTJsEngine implements VRTLifeCycle{
     public void api_httpRequest(String  jsObjectJsonStr){
         VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
         vrtJsManager.callbackHttpRequestForJs(vrtRequestBody.getUrl(),vrtRequestBody.get_param());
-        Log.i("jzy111", "api_httpRequest: "+jsObjectJsonStr);
+        Log.i("jzy111", "api_httpRequest: "+vrtRequestBody.get_param());
     }
 
     public void api_addViewClick(String vrtId){
