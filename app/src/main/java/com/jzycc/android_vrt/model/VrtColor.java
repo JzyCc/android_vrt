@@ -10,6 +10,13 @@ public class VrtColor {
     private int z;
     private int w;
 
+    public VrtColor(int x, int y, int z, int w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
+
     public int getX() {
         return x;
     }

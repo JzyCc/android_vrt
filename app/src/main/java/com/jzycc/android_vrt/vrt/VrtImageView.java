@@ -3,11 +3,13 @@ package com.jzycc.android_vrt.vrt;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.vrt.constant.VrtComponentType;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
@@ -18,48 +20,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Jzy
- * created by 2018/10/5
+ * @author : Jzy
+ * date   : 18-10-17
  */
-public class VrtViewParent extends FrameLayout{
+public class VrtImageView extends FrameLayout{
+
     private VrtViewData vc;
     private List<Point> points = new ArrayList<>();
     private VRTSdkManager vrtSdkManager;
     private VrtViewRenderHelper vrtViewRenderHelper;
     private VRTJsManager vrtJsManager;
 
-    public VrtViewParent(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData vc) {
+    private ImageView imageView;
+    public VrtImageView(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData vc) {
         super(context);
         this.vc = vc;
         this.vrtJsManager = vrtJsManager;
         vrtSdkManager = VRTSdkManager.getInstance();
+        imageView = new ImageView(context);
+        this.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         initThis();
     }
 
-    public VrtViewParent(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public VrtViewParent(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed,l,t,r,b);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
         final int childCount = getChildCount();
-        for(int i = 0 ;i < childCount; i++){
+        for(int i = 1 ;i < childCount; i++){
             View child = getChildAt(i);
-            child.layout(points.get(i).x,points.get(i).y,points.get(i).x+getChildAt(i).getWidth(),points.get(i).y+getChildAt(i).getHeight());
+            child.layout(points.get(i-1).x,points.get(i-1).y,points.get(i-1).x+getChildAt(i-1).getWidth(),points.get(i-1).y+getChildAt(i-1).getHeight());
         }
     }
 
     private void initThis() {
-//        //保存对象
-//        vrtJsManager.getViewMap().put(vc.get_vrtId(),this);
-//        //判断是否需要添加监听
-//        vrtJsManager.setClickListenerForView(this,vc.get_vrtId());
         vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager);
         if(vc!=null){
             for(VrtViewData vrtView:vc.getSubViews()){
@@ -85,5 +78,7 @@ public class VrtViewParent extends FrameLayout{
         }
     }
 
-
+    public ImageView getImageView() {
+        return imageView;
+    }
 }

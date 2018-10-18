@@ -4,7 +4,7 @@ package com.jzycc.android_vrt.model;
  * @author Jzy
  * created by 2018/10/2
  */
-public class ViewController {
+public class ViewControllerData {
     protected String _vrtId;
     protected VrtViewData view;
     protected String _clsName;

@@ -1,6 +1,9 @@
 package com.jzycc.android_vrt.vrt.helper;
 
+import android.content.Context;
+
 import com.jzycc.android_vrt.model.VrtViewData;
+import com.jzycc.android_vrt.vrt.VrtViewParent;
 
 import java.util.HashMap;
 
@@ -10,6 +13,15 @@ import java.util.HashMap;
  */
 public interface VrtViewRenderService {
 
+
+    /**
+     * @param context {@link Context}
+     * @param vrtViewData {@link VrtViewData}
+     *
+     * 渲染整个View
+     */
+    VrtViewParent setVRTRenderView(Context context, VrtViewData vrtViewData);
+
     /**
      * @param vrtView
      *
@@ -18,7 +30,7 @@ public interface VrtViewRenderService {
     void setTextView(VrtViewData vrtView);
 
     /**
-     * @param vrtView
+     * @param vrtView {@link VrtViewData}
      * @param data
      *
      * creat a {@link android.widget.TextView} in cell
@@ -26,13 +38,13 @@ public interface VrtViewRenderService {
     void setTextView(VrtViewData vrtView,HashMap<String,Object> data);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * creat a {@link android.widget.ImageView}
      */
     void setImageView(VrtViewData vrtView);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * @param data
      * creat a {@link android.widget.ImageView} in cell
      */
@@ -45,7 +57,7 @@ public interface VrtViewRenderService {
     void setViewParent(VrtViewData vrtView);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * @param data
      * creat a {@link android.view.ViewGroup} in cell
      */
@@ -58,20 +70,20 @@ public interface VrtViewRenderService {
     void setEditText(VrtViewData vrtView);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * @param data
      * creat a {@link android.view.ViewGroup} in cell
      */
     void setEditText(VrtViewData vrtView,HashMap<String,Object> data);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * creat a {@link android.support.v7.widget.RecyclerView}
      */
     void setRecyclerView(VrtViewData vrtView);
 
     /**
-     * @param vrtView
+     * @param vrtView  {@link VrtViewData}
      * @param data
      * creat a {@link android.view.ViewGroup} in cell
      */

@@ -2,9 +2,13 @@ Object.prototype._clsName = null;
 
 var _vrtViewIndex = 0;
 
-var _kHeightScale = 0;
-var _kWidthScale = 0;
+var kHeightScale = 0;
+var kWidthScale = 0;
 var kFontScale = 0;
+
+const TextAlignmentCenter = "TextAlignmentCenter";
+const TextAlignmentLeft = "TextAlignmentLeft";
+const TextAlignmentRight = "TextAlignmentRight";
 
 function Vec2(x,y)
 {
@@ -137,13 +141,13 @@ function vrt_layout(){
     }
     
     this.heightIs = function(height){
-        this.masterView._height = height * _kHeightScale;
+        this.masterView._height = height * kHeightScale;
         this._resolvePendCenterY();
         return this;
     }
     
     this.widthIs = function(width){
-        this.masterView._width = width * _kWidthScale;
+        this.masterView._width = width * kWidthScale;
         this._resolvePendCenterX();
         return this;
     }
@@ -188,7 +192,7 @@ function vrt_layout(){
     
     this.centerYIs = function(y)
     {
-        this.pendCenterY = y * _kHeightScale;
+        this.pendCenterY = y * kHeightScale;
         return this;
     }
     
@@ -204,7 +208,7 @@ function vrt_layout(){
     }
     
     this.topSpaceToView = function(view,space){
-        space = space * _kHeightScale;
+        space = space * kHeightScale;
         if(view == null)
             view = this.masterView.superView;
         this.pendCenterY = null;
@@ -228,7 +232,7 @@ function vrt_layout(){
     
     this.centerXIs = function(x)
     {
-        this.pendCenterX = x * _kWidthScale;
+        this.pendCenterX = x * kWidthScale;
         return this;
     }
     
@@ -244,7 +248,7 @@ function vrt_layout(){
     }
     
     this.leftSpaceToView = function(view,space){
-        space = space * _kWidthScale;
+        space = space * kWidthScale;
         if(view == null)
             view = this.masterView.superView;
         this.pendCenterX = null;
@@ -367,9 +371,9 @@ function ViewController(hasNavigationBar,hasTabBar)
     this._vrtId = -1;
     this.view = new View();
     this.view.setFrame(0,0,api_getBaseViewWidth() * 1,api_getBaseViewHeight(hasNavigationBar,hasTabBar) * 1);//667 full screen  554 with Navigation Bar & Tab Bar
-    _kHeightScale = this.view._height/667.0;
-    _kWidthScale = this.view._width/375.0;
-    kFontScale = _kWidthScale;
+    kHeightScale = this.view._height/667.0;
+    kWidthScale = this.view._width/375.0;
+    kFontScale = kWidthScale;
     this.view.backgroundColor = whiteColor;
     this.view.superView = null;
     this._clsName = 'ViewController';
@@ -400,14 +404,16 @@ function Label()
     View.call(this);
     this._clsName = 'Label';
     this.text = '';
-    this.fontSize = 12 * kFontScale;
+    this.fontSize = 15 * kFontScale;
     this.textColor = blackColor;
     this.numberOfLines = 1;
+    this.textAlignment = TextAlignmentLeft;
     
     _kvo_add_refresh_prop(this,'text');
     _kvo_add_refresh_prop(this,'fontSize');
     _kvo_add_refresh_prop(this,'textColor');
     _kvo_add_refresh_prop(this,'numberOfLines');
+    _kvo_add_refresh_prop(this,'textAlignment');
 }
 
 function ImgView()
@@ -425,25 +431,40 @@ function List()
     
     this._cell = {};
     this._dataSource = {};
+
+    this._cellSectionIndex = 0;
+    this._dataSourceSectionIndex = 0;
     
+    this.addCellAtSection = function(Celltmp)
+    {
+        this._cell[this._cellSectionIndex++] = Celltmp;
+    }
+
     this.setCellAtSection = function(section,Celltmp)
     {
-        this._cell[section] = Celltmp;
+        // if(section < _cellSectionIndex)
+            this._cell[section] = Celltmp;
+    }
+    
+    this.addDataSourceAtSection = function(data)
+    {
+        this._dataSource[this._dataSourceSectionIndex++] = data;
     }
     
     this.setDataSourceAtSection = function(section,data)
     {
-        this._dataSource[section] = data;
+        // if(section < _dataSourceSectionIndex)
+            this._dataSource[section] = data;
     }
-    
+
     this.addCallBackDidSelectRowAtIndexPath = function(func)
     {
         addCallBack(this._vrtId + "CallBackDidSelectRowAtIndexPath",func);
     }
     
-    this.reloadData = function()
+    this.reloadData = function(dataSource)
     {
-        api_refreshList(this._vrtId);
+        api_refreshListData(this._vrtId,dataSource);
     }
 }
 
@@ -458,7 +479,7 @@ function Cell()
     this._clsName = 'Cell';
     this.setCellFixHeight = function(fixHeight)
     {
-        this.setFrame(0,0,0,fixHeight);
+        this.setFrame(0,0,api_getBaseViewWidth() * 1,fixHeight);
     }
 }
 
@@ -467,18 +488,22 @@ function TextField()
     View.call(this);
     this._clsName = "TextField";
     this.text = "";
-    this.fontSize = 12 * kFontScale;
+    this.fontSize = 15 * kFontScale;
     this.textColor = blackColor;
+    this.textAlignment = TextAlignmentLeft;
     
     _kvo_add_refresh_prop(this,'text');
     _kvo_add_refresh_prop(this,'fontSize');
     _kvo_add_refresh_prop(this,'textColor');
+    _kvo_add_refresh_prop(this,'textAlignment');
     
     this.addCallBackDidReturn = function(func)
     {
         addCallBack(this._vrtId + "CallBackDidReturn",func);
     }
 }
+
+
 
 
 var thisNavigetion = null;
@@ -585,6 +610,15 @@ function HttpRequest(url,func)
             this._param = param;
         api_httpRequest(this);
     }
+
+    this.request_oniKu = function(param)
+    {
+        if(param == null)
+            this._param = {};
+        else
+            this._param = param;
+        api_httpRequest_iKu(this);
+    }
     _vrt_httpRqe_Cache[url] = func;
 }
 
@@ -598,126 +632,3 @@ function _api_httpResponse(url,data,info)
 }
 
 
-
-/* TEST CODE *//* TEST CODE *//* TEST CODE *//* TEST CODE *//* TEST CODE *//* TEST CODE *//* TEST CODE */
-
-//创建测试数据
-function model4Test()
-{
-    this.userName = null;
-}
-
-var dataSource = new Array();
-
-for(var i = 0; i < 10; i++)
-{
-    var model = new model4Test();
-    model.userName = "userName " + i;
-    dataSource.push(model);
-}
-
-
-//获取导航控制器、且获取参数
-var param = getThisNavigation().getPushedParam();
-
-//创建唯一的视图控制器
-var mainVC = new ViewController(true,true);
-
-
-
-//在视图不同阶段添加回调
-mainVC.addCallBackViewDidLoad(function(){
-                              // api_log("view did load");
-                              });
-mainVC.addCallBackViewWillAppear(function(){
-                                 // api_log("view will appear");
-                                 });
-mainVC.addCallBackViewDidAppear(function(){
-                                // api_log("view did appear");
-                                });
-mainVC.addCallBackViewWillDisappear(function(){
-                                    // api_log("view will disappear");
-                                    });
-
-//创建一个列表视图
-var list = new List();
-
-//添加列表中cell的点击回调
-list.addCallBackDidSelectRowAtIndexPath(function(section,row){
-                                        api_log(" did select section : " + section + " row : " + row);
-                                        });
-
-mainVC.view.addSubView(list);
-list.vrt_layout.topEqualToView(null).leftEqualToView(null).heightRatioToView(null,0.5).widthRatioToView(null,1);
-
-//创建一个cell模版
-var cell = new Cell();
-//设置cell的固定高度 (当前不支持动态高度自适应)
-cell.setCellFixHeight(100);
-
-
-//创建一个图片视图
-var imgView = new ImgView();
-imgView.imageUrl = "http://114.55.84.37/anbao/img/dog.png";
-cell.addSubView(imgView);
-imgView.vrt_layout.topSpaceToView(cell,10).leftSpaceToView(cell,10).heightIs(60).widthEqualToHeight();
-
-//创建一个文本显示视图
-var label1 = new Label();
-//因为该视图是放在cell模版中的、需要bind一个model中的key
-label1.text = bindKey("userName");
-label1.textColor = redColor;
-label1.fontSize = 18 * kFontScale;
-cell.addSubView(label1);
-label1.vrt_layout.topSpaceToView(cell,10).leftSpaceToView(imgView,10).heightIs(60).widthIs(150);
-
-//给list设置cell模版、native将根据cell模版生成合适数量的视图、并进行复用
-list.setCellAtSection(0,cell);
-//设置list的数据源
-list.setDataSourceAtSection(0,dataSource);
-
-
-var basicUrl = "http://dyba.xuebaeasy.com:8090/";
-//创建一个http请求器
-var reqTest = new HttpRequest(basicUrl + "user/loginToApp",function(data,info){
-                              api_log(data.msg);
-                              })
-
-//创建一个基本的视图、
-var view4testClick = new View();
-view4testClick.backgroundColor = redColor;
-mainVC.view.addSubView(view4testClick);
-view4testClick.vrt_layout.topSpaceToView(list,15).centerXEqualToView(null).heightIs(30).widthEqualToHeight();
-//为该视图增加一个点击事件的回调
-view4testClick.addClick(view4testClick,function(){
-                        reqTest.request({"userPhone":"","userPassword":""});
-                        textField.text = "OK";
-                        var alert = new Alert();
-                        alert.title = "title";
-                        alert.msg = "msg";
-                        alert.addAction(new AlertAction("Black"),function(){
-                            dispatchWithAnimation(0.6,function(){
-                                mainVC.view.backgroundColor = blackColor;
-                            })
-                        });
-
-                        alert.addAction(new AlertAction("Black"),function(){
-                            dispatchWithAnimation(0.6,function(){
-                                mainVC.view.backgroundColor = greenColor;
-                            })
-                        });
-                        alert.show();
-                        });
-
-//创建一个文本输入视图
-var textField = new TextField();
-textField.text = "placeHolder";
-textField.backgroundColor = blackColor;
-textField.textColor = whiteColor;
-mainVC.view.addSubView(textField);
-textField.vrt_layout.topSpaceToView(list,15).leftSpaceToView(view4testClick,10).heightIs(30).widthIs(100);
-textField.addCallBackDidReturn(function(text){
-                               api_log("user input text: " + text);
-                               });
-//提交这个视图控制器
-api_commitVC(mainVC);

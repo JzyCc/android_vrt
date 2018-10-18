@@ -42,4 +42,10 @@ public class VRTOkHttpManager {
                 .post(body)
                 .build();
     }
+
+    public static Request getJsByUrl(String url){
+        return new Request.Builder()
+                .url(url)
+                .build();
+    }
 }

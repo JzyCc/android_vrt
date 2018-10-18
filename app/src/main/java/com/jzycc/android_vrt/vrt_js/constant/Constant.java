@@ -515,17 +515,54 @@ public class Constant {
             "    }\n" +
             "}";
 
-    public static final String JS_TEST_CODE = "" +
+    public static final String JS_TEST_CODE = "//创建测试数据\n" +
+            "function model4Test()\n" +
+            "{\n" +
+            "    this.userName = null;\n" +
+            "}\n" +
+            "\n" +
+            "var dataSource = new Array();\n" +
+            "\n" +
+            "for(var i = 0; i < 10; i++)\n" +
+            "{\n" +
+            "    var model = new model4Test();\n" +
+            "    model.userName = \"userName \" + i;\n" +
+            "    dataSource.push(model);\n" +
+            "}\n" +
+            "\n" +
+            "//创建唯一的视图控制器\n" +
             "var mainVC = new ViewController();\n" +
-            "mainVC.view._setFrame(0,0,api_getBaseViewWidth()*1,api_getBaseViewHeight()*1);"+
-            "var label = new TextField();\n" +
-            "label.vrt_layout.heightIs(500).widthIs(1000);\n" +
-            "label.text = \"test\";\n" +
-            "label.textColor = blackColor;\n" +
-            "label._x = 0;\n" +
-            "label._y = 0;\n" +
-            "mainVC.view.addSubView(label);\n" +
-            "commitVC(mainVC)";
+            "\n" +
+            "\n" +
+            "\n" +
+            "//在视图不同阶段添加回调\n" +
+            "mainVC.addCallBackViewDidLoad(function(){\n" +
+            "                              // api_log(\"view did load\");\n" +
+            "                              });\n" +
+            "mainVC.addCallBackViewWillAppear(function(){\n" +
+            "                                 // api_log(\"view will appear\");\n" +
+            "                                 });\n" +
+            "mainVC.addCallBackViewDidAppear(function(){\n" +
+            "                                // api_log(\"view did appear\");\n" +
+            "                                });\n" +
+            "mainVC.addCallBackViewWillDisappear(function(){\n" +
+            "                                    // api_log(\"view will disappear\");\n" +
+            "                                    });\n" +
+            "\n" +
+            "//创建一个列表视图\n" +
+            "var list = new List();\n" +
+            "\n" +
+            "//添加列表中cell的点击回调\n" +
+            "list.addCallBackDidSelectRowAtIndexPath(function(section,row){\n" +
+            "                                        api_log(\" did select section : \" + section + \" row : \" + row);\n" +
+            "                                        });\n" +
+            "\n" +
+            "mainVC.view.addSubView(list);\n" +
+            "list.vrt_layout.topEqualToView(null).leftEqualToView(null).heightRatioToView(null,0.5).widthRatioToView(null,1);\n" +
+            "\n" +
+            "//设置list的数据源\n" +
+            "list.setDataSourceAtSection(0,dataSource);\n"+
+            "api_commitVC(mainVC);";
 
     public static final String JS_CODE_4ANDROID = "/**\n" +
             " * Created by JzyCc on 2018/10/3.\n" +
