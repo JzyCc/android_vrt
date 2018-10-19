@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements VRTRenderListener
 
         VRTJsEngine = new VRTJsEngine(this);
         frameLayout = (FrameLayout)findViewById(R.id.fl_layout);
-        //VRTJsEngine.requestRenderByUrl("http://21xa689434.imwork.net:8090/public/vrtJS/1/personalHomePage.js",frameLayout);
-        VRTJsEngine.requestRenderByFile("VRTJSCode.js");
+        VRTJsEngine.requestRenderByUrl("http://21xa689434.imwork.net:8090/public/vrtJS/1/personalHomePage.js",frameLayout);
+        //VRTJsEngine.requestRenderByFile("VRTJSCode.js");
     }
 
     @Override

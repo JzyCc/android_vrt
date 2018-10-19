@@ -38,6 +38,7 @@ public class VrtImageView extends FrameLayout{
         this.vrtJsManager = vrtJsManager;
         vrtSdkManager = VRTSdkManager.getInstance();
         imageView = new ImageView(context);
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         this.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         initThis();
     }

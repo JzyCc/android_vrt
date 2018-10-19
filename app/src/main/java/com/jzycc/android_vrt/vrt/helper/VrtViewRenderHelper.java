@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -99,6 +100,12 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         VrtImageView vrtImageView = initImageView(vrtView);
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),vrtImageView);
         vrtJsManager.setClickListenerForView(vrtImageView,vrtView.get_vrtId());
+        if(vrtView.getImageUrl()!=null){
+            if(vrtView.getImageUrl().equals("HomePageDefaultBg")){
+                Log.i("jzy111", "setImageView: "+vrtView.get_width());
+            }
+        }
+        Log.i("jzy", "setImageView: "+vrtView.get_width());
         parent.addView(vrtImageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
@@ -145,9 +152,9 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
 
     @Override
     public void setRecyclerView(VrtViewData vrtView){
-        RecyclerView recyclerView = initRecyclerView(vrtView);
-        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
-        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+//        RecyclerView recyclerView = initRecyclerView(vrtView);
+//        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
+//        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
     @Override
@@ -190,6 +197,11 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         }
         if(vrtView.getBackgroundColor() != null){
             textView.setBackgroundColor(getColor(vrtView.getBackgroundColor()));
+        }
+        if(vrtView.getTextAlignment()!=null){
+            if(vrtView.getTextAlignment().contains("Center")){
+                textView.setGravity(Gravity.CENTER);
+            }
         }
         return textView;
     }

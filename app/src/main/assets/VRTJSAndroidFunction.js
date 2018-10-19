@@ -90,9 +90,11 @@ function api_httpRequest(jsObject){
 }
 
 //无必要的网络请求 ：）
-//function api_httpRequest_iKu(jsObject){
-//
-//}
+var method_Api_httpRequest_iku = ScriptAPI.getMethod("api_httpRequest_iKu",[java.lang.String])
+function api_httpRequest_iKu(jsObject){
+    var jsonStr = JSON.stringify(jsObject)
+    method_Api_httpRequest_iku.invoke(javaContext,jsonStr)
+}
 
 //点击回调
 var method_Api_addViewClick = ScriptAPI.getMethod("api_addViewClick",[java.lang.String])
@@ -122,31 +124,58 @@ function PushModel(){
     var url
     var param
 }
-//
-////返回上一个页面
-//var method_Api_popThis = ScriptAPI.getMethod("api_popThis")
-//function api_popThis(){
-//    method_Api_popThis.invoke(javaContext)
-//}
-//
+
+//返回上一个页面
+var method_Api_popThis = ScriptAPI.getMethod("api_popThis")
+function api_popThis(){
+    method_Api_popThis.invoke(javaContext)
+}
+
 //获取跳转参数
+var method_Api_getPushedParam = ScriptAPI.getMethod("api_getPushedParam")
 function api_getPushedParam(){
+    return method_Api_getPushedParam.invoke(javaContext)
+}
+
+//显示弹窗
+function api_showAlert(){
 
 }
-//
-////显示弹窗
-//function api_showAlert(){
-//
-//}
-//
-////动画
-//function api_dispatchWithAnimation(duration,func){
-//
-//}
-//
-////更新list
-//function api_refreshListData(_vrtId,dataSource){
-//
-//}
+
+//动画
+function api_dispatchWithAnimation(duration,func){
+
+}
+
+//更新list
+var method_Api_refreshListData = ScriptAPI.getMethod("api_refreshListData",[java.lang.String])
+function api_refreshListData(_vrtId,numberOfSections,numberOfRowsAtSection){
+   var section = new Section()
+    section.numberOfSections = numberOfSections;
+    section.numberOfRowsAtSection = numberOfRowsAtSection;
+    section._vrtId = _vrtId;
+
+    var str = JSON.stringify(section)
+
+    method_Api_refreshListData(javaContext,str)
+}
+function Section(){
+        var _vrtId
+        var numberOfSections
+        var numberOfRowsAtSection
+}
+
+var method_Api_commitCell = ScriptAPI.getMethod("api_commitCell",[java.lang.String])
+function api_commitCell(cell){
+    var vc1 = new View()
+
+    vc1 = cell
+
+    getVcForAndroid([vc1])
+
+    var str = JSON.stringify(vc1)
+
+    method_Api_commitCell.invoke(javaContext,str)
+}
 
 

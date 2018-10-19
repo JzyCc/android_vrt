@@ -90,7 +90,7 @@ function vrt_kvo_bind(target,key,func)
 
 var _vrt_callback_cache = {};
 
-function addCallBack(key,func)
+function _addCallBack(key,func)
 {
     _vrt_callback_cache[key] = func;
 }
@@ -118,9 +118,9 @@ function _api_responseTextFieldReturn(key,text)
 
 
 /**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**/
-function vrt_layout(){
+function vrt_layout(_masterView){
     
-    this.masterView = null;
+    this.masterView = _masterView;
     this.pendCenterX = null;
     this.pendCenterY = null;
     
@@ -291,8 +291,7 @@ function View()
     this._clsName = 'View';
     this.subViews = new Array();
     this.backgroundColor = clearColor;
-    this.vrt_layout = new vrt_layout();
-    this.vrt_layout.masterView = this;
+    this.vrt_layout = new vrt_layout(this);
     
     this.cornerRadius = 0;
     
@@ -306,10 +305,10 @@ function View()
         this._height = height;
     }
     
-    this.addClick = function(view,func)
+    this.addClick = function(func)
     {
-        addCallBack(view._vrtId,func);
-        api_addViewClick(view._vrtId);
+        _addCallBack(this._vrtId,func);
+        api_addViewClick(this._vrtId);
     }
     
     this.addSubView = function(subView){
@@ -370,7 +369,7 @@ function ViewController(hasNavigationBar,hasTabBar)
 {
     this._vrtId = -1;
     this.view = new View();
-    this.view.setFrame(0,0,api_getBaseViewWidth() * 1,api_getBaseViewHeight(hasNavigationBar,hasTabBar) * 1);//667 full screen  554 with Navigation Bar & Tab Bar
+    this.view.setFrame(0,0,api_getBaseViewWidth(),api_getBaseViewHeight(hasNavigationBar,hasTabBar));
     kHeightScale = this.view._height/667.0;
     kWidthScale = this.view._width/375.0;
     kFontScale = kWidthScale;
@@ -382,19 +381,19 @@ function ViewController(hasNavigationBar,hasTabBar)
     _kvo_add_refresh_prop(this,'title');
     
     this.addCallBackViewDidLoad = function(func){
-        addCallBack(this._vrtId + "CallBackViewDidLoad",func);
+        _addCallBack(this._vrtId + "CallBackViewDidLoad",func);
     }
     
     this.addCallBackViewWillAppear = function(func){
-        addCallBack(this._vrtId + "CallBackViewWillAppear",func);
+        _addCallBack(this._vrtId + "CallBackViewWillAppear",func);
     }
     
     this.addCallBackViewDidAppear = function(func){
-        addCallBack(this._vrtId + "CallBackViewDidAppear",func);
+        _addCallBack(this._vrtId + "CallBackViewDidAppear",func);
     }
     
     this.addCallBackViewWillDisappear = function(func){
-        addCallBack(this._vrtId + "CallBackViewWillDisappear",func);
+        _addCallBack(this._vrtId + "CallBackViewWillDisappear",func);
     }
 }
 
@@ -429,48 +428,29 @@ function List()
     View.call(this);
     this._clsName = 'List';
     
-    this._cell = {};
-    this._dataSource = {};
-
-    this._cellSectionIndex = 0;
-    this._dataSourceSectionIndex = 0;
-    
-    this.addCellAtSection = function(Celltmp)
+    this.addCallBackCommitCellAtIndexPath = function(func)
     {
-        this._cell[this._cellSectionIndex++] = Celltmp;
-    }
-
-    this.setCellAtSection = function(section,Celltmp)
-    {
-        // if(section < _cellSectionIndex)
-            this._cell[section] = Celltmp;
+        _addCallBack(this._vrtId + "CallBackCommitCellAtIndexPath",func);
     }
     
-    this.addDataSourceAtSection = function(data)
-    {
-        this._dataSource[this._dataSourceSectionIndex++] = data;
-    }
-    
-    this.setDataSourceAtSection = function(section,data)
-    {
-        // if(section < _dataSourceSectionIndex)
-            this._dataSource[section] = data;
-    }
-
     this.addCallBackDidSelectRowAtIndexPath = function(func)
     {
-        addCallBack(this._vrtId + "CallBackDidSelectRowAtIndexPath",func);
+        _addCallBack(this._vrtId + "CallBackDidSelectRowAtIndexPath",func);
     }
     
-    this.reloadData = function(dataSource)
+    this.reloadData = function(numberOfSections,numberOfRowsAtSection)
     {
-        api_refreshListData(this._vrtId,dataSource);
+        api_refreshListData(this._vrtId,numberOfSections,numberOfRowsAtSection);
     }
 }
 
-function bindKey(key)
+//call this func only when CallBackCommitCellAtIndexPath invoked
+function commitCell(cell)
 {
-    return "bindKey:" + key;
+    if(cell._clsName == "Cell")
+    {
+        api_commitCell(cell);
+    }
 }
 
 function Cell()
@@ -479,7 +459,7 @@ function Cell()
     this._clsName = 'Cell';
     this.setCellFixHeight = function(fixHeight)
     {
-        this.setFrame(0,0,api_getBaseViewWidth() * 1,fixHeight);
+        this.setFrame(0,0,api_getBaseViewWidth(),fixHeight);
     }
 }
 
@@ -499,7 +479,7 @@ function TextField()
     
     this.addCallBackDidReturn = function(func)
     {
-        addCallBack(this._vrtId + "CallBackDidReturn",func);
+        _addCallBack(this._vrtId + "CallBackDidReturn",func);
     }
 }
 
@@ -596,7 +576,6 @@ function dispatchWithAnimation(duration,func)
 }
 
 var _vrt_httpRqe_Cache = {};
-//原型func(json data,string info)
 function HttpRequest(url,func)
 {
     this.url = url;

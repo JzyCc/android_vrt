@@ -23,6 +23,7 @@ public class VrtViewData {
     private Float fontSize;
     private VrtColor textColor;
     private Integer numberOfLines;
+    private String textAlignment;
     //ImageView
     private String imageUrl;
     //Item
@@ -131,6 +132,14 @@ public class VrtViewData {
 
     public void setNumberOfLines(Integer numberOfLines) {
         this.numberOfLines = numberOfLines;
+    }
+
+    public String getTextAlignment() {
+        return textAlignment;
+    }
+
+    public void setTextAlignment(String textAlignment) {
+        this.textAlignment = textAlignment;
     }
 
     public String getImageUrl() {

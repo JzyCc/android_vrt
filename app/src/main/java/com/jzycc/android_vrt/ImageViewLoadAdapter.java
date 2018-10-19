@@ -1,6 +1,8 @@
 package com.jzycc.android_vrt;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -17,7 +19,16 @@ public class ImageViewLoadAdapter implements IVRTImageLoadAdapter {
         imageView.post(new Runnable() {
             @Override
             public void run() {
-                Glide.with(mContext).load(imageUrl).into(imageView);
+                if(imageUrl!=null) {
+                    if (imageUrl.equals("HomePageDefaultBg")) {
+                        Log.i("jzy111", "run: " + imageUrl);
+                        Glide.with(mContext).load(R.drawable.homepagedefaultbg).into(imageView);
+                    }
+                    else {
+                        //Log.i("jzy111", "run: "+imageUrl);
+                        Glide.with(mContext).load(imageUrl).into(imageView);
+                    }
+                }
             }
         });
     }

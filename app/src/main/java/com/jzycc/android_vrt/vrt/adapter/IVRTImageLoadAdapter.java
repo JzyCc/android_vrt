@@ -12,5 +12,4 @@ import android.widget.ImageView;
 public interface IVRTImageLoadAdapter {
 
     void setImage(Context mContext, ImageView imageView, String imageUrl);
-
 }

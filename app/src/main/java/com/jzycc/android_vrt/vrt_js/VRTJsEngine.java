@@ -101,7 +101,7 @@ public class VRTJsEngine implements VRTLifeCycle{
                 String result = "var ScriptAPI = java.lang.Class.forName(\"" + VRTJsEngine.class.getName() + "\", true, javaLoader);\n" +
                         vrtjsAndroidFunction+
                         vrtJsFrameworkCode+
-                        Constant.JS_CODE_TEST;
+                        jsCode;
 
                 requestRender(result);
             }
@@ -247,6 +247,12 @@ public class VRTJsEngine implements VRTLifeCycle{
         Log.i("jzy111", "api_httpRequest: "+vrtRequestBody.get_param());
     }
 
+    public void api_httpRequest_iKu(String jsObjectJsonStr){
+        Log.i(TAG, "api_httpRequest_iKu: "+jsObjectJsonStr);
+        VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
+        Log.i(TAG, "api_httpRequest_iKu: "+vrtRequestBody);
+    }
+
     public void api_addViewClick(String vrtId){
         vrtJsManager.getClickableViewVrtIds().add(vrtId);
         Log.i("jzy111", "api_addViewClick: "+vrtId);
@@ -277,5 +283,21 @@ public class VRTJsEngine implements VRTLifeCycle{
     public void api_pushUrlWithParam(String jsonStrt){
         Map param = gson.fromJson(jsonStrt,Map.class);
         Log.i(TAG, "api_pushUrlWithParam: "+param);
+    }
+
+    public void api_getPushedParam(){
+
+    }
+
+    public void api_popThis(){
+
+    }
+
+    public void api_refreshListData(String jsonStr){
+        Log.i(TAG, "api_refreshListData: "+jsonStr);
+    }
+
+    public void api_commitCell(String jsonStr){
+        Log.i(TAG, "api_commitCell: "+jsonStr);
     }
 }
