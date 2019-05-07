@@ -1,5 +1,6 @@
 package com.jzycc.android_vrt.vrt;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import java.util.List;
  * @author : Jzy
  * date   : 18-10-17
  */
+@SuppressLint("ViewConstructor")
 public class VrtImageView extends FrameLayout{
 
     private VrtViewData vc;

@@ -89,14 +89,13 @@ public class VRTJsManager {
                 @Override
                 public void onClick(View v) {
                     Log.i("jzy", "onClick: "+type+"，"+position);
-                    vrtJsEngine.callFunction(FunctionName.API_RESPONSE_LIST_DID_SELECT_ROW,new Object[]{vrtId,type,position});
+                    vrtJsEngine.callFunction(FunctionName.API_RESPONSE_LIST_DID_SELECT_ROW,new Object[]{vrtId + "CallBackDidSelectRowAtIndexPath",type,position});
                 }
             });
         }
     }
 
     public void refreshView(String vrtId, String attributeName, Object param){
-        Log.i("jzy111", "refreshView: "+vrtId+","+attributeName+","+param);
         if(viewMap.get(vrtId)!=null&&param!=null){
             View view = viewMap.get(vrtId);
             switch (attributeName){
@@ -189,5 +188,9 @@ public class VRTJsManager {
                 }
             }
         });
+    }
+
+    public VRTJsEngine getVrtJsEngine() {
+        return vrtJsEngine;
     }
 }

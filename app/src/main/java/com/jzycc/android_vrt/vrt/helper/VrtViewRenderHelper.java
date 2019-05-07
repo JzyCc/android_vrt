@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jzycc.android_vrt.R;
 import com.jzycc.android_vrt.model.VrtColor;
 import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.vrt.VrtImageView;
@@ -100,12 +101,6 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         VrtImageView vrtImageView = initImageView(vrtView);
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),vrtImageView);
         vrtJsManager.setClickListenerForView(vrtImageView,vrtView.get_vrtId());
-        if(vrtView.getImageUrl()!=null){
-            if(vrtView.getImageUrl().equals("HomePageDefaultBg")){
-                Log.i("jzy111", "setImageView: "+vrtView.get_width());
-            }
-        }
-        Log.i("jzy", "setImageView: "+vrtView.get_width());
         parent.addView(vrtImageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
@@ -152,9 +147,9 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
 
     @Override
     public void setRecyclerView(VrtViewData vrtView){
-//        RecyclerView recyclerView = initRecyclerView(vrtView);
-//        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
-//        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        RecyclerView recyclerView = initRecyclerView(vrtView);
+        vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
+        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
     }
 
     @Override
@@ -174,7 +169,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
             return Color.argb(vrtColor.getW(),vrtColor.getX(),vrtColor.getY(),vrtColor.getZ());
         }
         else {
-            return Color.argb(0,255,255,255);
+            return Color.argb(255,255,255,255);
         }
     }
 
@@ -190,7 +185,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
             textView.setMaxLines(vrtView.getNumberOfLines());
         }
         if(vrtView.getFontSize() != null){
-            textView.setTextSize(vrtView.getFontSize());
+            textView.setTextSize(16);
         }
         if(vrtView.getTextColor()!=null){
             textView.setTextColor(getColor(vrtView.getTextColor()));
@@ -240,8 +235,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         LinearLayoutManager linearLayoutManager  = new LinearLayoutManager(mContext);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setBackgroundColor(getColor(vrtView.getBackgroundColor()));
-        VrtListAdapter vrtListAdapter = new VrtListAdapter(mContext,vrtJsManager,vrtView);
-        recyclerView.setAdapter(vrtListAdapter);
+        vrtJsManager.getVrtJsEngine().getVrtViewManager().getVrtViewMap().put(vrtView.get_vrtId(),recyclerView);
         return recyclerView;
     }
 

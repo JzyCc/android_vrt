@@ -369,7 +369,7 @@ function ViewController(hasNavigationBar,hasTabBar)
 {
     this._vrtId = -1;
     this.view = new View();
-    this.view.setFrame(0,0,api_getBaseViewWidth(),api_getBaseViewHeight(hasNavigationBar,hasTabBar));
+    this.view.setFrame(0,0,api_getBaseViewWidth(),api_getBaseViewHeight(false,false));
     kHeightScale = this.view._height/667.0;
     kWidthScale = this.view._width/375.0;
     kFontScale = kWidthScale;
@@ -377,21 +377,21 @@ function ViewController(hasNavigationBar,hasTabBar)
     this.view.superView = null;
     this._clsName = 'ViewController';
     this.title = "title";
-    
+
     _kvo_add_refresh_prop(this,'title');
-    
+
     this.addCallBackViewDidLoad = function(func){
         _addCallBack(this._vrtId + "CallBackViewDidLoad",func);
     }
-    
+
     this.addCallBackViewWillAppear = function(func){
         _addCallBack(this._vrtId + "CallBackViewWillAppear",func);
     }
-    
+
     this.addCallBackViewDidAppear = function(func){
         _addCallBack(this._vrtId + "CallBackViewDidAppear",func);
     }
-    
+
     this.addCallBackViewWillDisappear = function(func){
         _addCallBack(this._vrtId + "CallBackViewWillDisappear",func);
     }
@@ -407,7 +407,7 @@ function Label()
     this.textColor = blackColor;
     this.numberOfLines = 1;
     this.textAlignment = TextAlignmentLeft;
-    
+
     _kvo_add_refresh_prop(this,'text');
     _kvo_add_refresh_prop(this,'fontSize');
     _kvo_add_refresh_prop(this,'textColor');
@@ -427,29 +427,15 @@ function List()
 {
     View.call(this);
     this._clsName = 'List';
-    
-    this.addCallBackCommitCellAtIndexPath = function(func)
-    {
-        _addCallBack(this._vrtId + "CallBackCommitCellAtIndexPath",func);
-    }
-    
+
     this.addCallBackDidSelectRowAtIndexPath = function(func)
     {
         _addCallBack(this._vrtId + "CallBackDidSelectRowAtIndexPath",func);
     }
-    
-    this.reloadData = function(numberOfSections,numberOfRowsAtSection)
-    {
-        api_refreshListData(this._vrtId,numberOfSections,numberOfRowsAtSection);
-    }
-}
 
-//call this func only when CallBackCommitCellAtIndexPath invoked
-function commitCell(cell)
-{
-    if(cell._clsName == "Cell")
+    this.reloadData = function(numberOfSections, offset, length, rowDataAtSection)
     {
-        api_commitCell(cell);
+        api_refreshListData(this._vrtId,numberOfSections, offset, length, rowDataAtSection);
     }
 }
 
@@ -471,12 +457,12 @@ function TextField()
     this.fontSize = 15 * kFontScale;
     this.textColor = blackColor;
     this.textAlignment = TextAlignmentLeft;
-    
+
     _kvo_add_refresh_prop(this,'text');
     _kvo_add_refresh_prop(this,'fontSize');
     _kvo_add_refresh_prop(this,'textColor');
     _kvo_add_refresh_prop(this,'textAlignment');
-    
+
     this.addCallBackDidReturn = function(func)
     {
         _addCallBack(this._vrtId + "CallBackDidReturn",func);
@@ -496,7 +482,7 @@ function getThisNavigation()
         thisNavigetion.url = naDic.url;
     }
     return thisNavigetion;
-    
+
 }
 
 function Navigation()
@@ -580,7 +566,7 @@ function HttpRequest(url,func)
 {
     this.url = url;
     this._param = {};
-    
+
     this.request = function(param)
     {
         if(param == null)
@@ -590,14 +576,6 @@ function HttpRequest(url,func)
         api_httpRequest(this);
     }
 
-    this.request_oniKu = function(param)
-    {
-        if(param == null)
-            this._param = {};
-        else
-            this._param = param;
-        api_httpRequest_iKu(this);
-    }
     _vrt_httpRqe_Cache[url] = func;
 }
 
@@ -609,5 +587,3 @@ function _api_httpResponse(url,data,info)
         httpReqFunc(data,info);
     }
 }
-
-

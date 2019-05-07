@@ -3,6 +3,7 @@ package com.jzycc.android_vrt.vrt_js;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -13,10 +14,13 @@ import com.google.gson.Gson;
 import com.jzycc.android_vrt.model.ViewControllerData;
 import com.jzycc.android_vrt.model.VrtRefreshMsg;
 import com.jzycc.android_vrt.model.VrtRequestBody;
+import com.jzycc.android_vrt.model.VrtSectionData;
+import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.utils.CalculateUtils;
 import com.jzycc.android_vrt.utils.FileUtils;
 import com.jzycc.android_vrt.vrt.ViewController;
 import com.jzycc.android_vrt.vrt.VrtViewParent;
+import com.jzycc.android_vrt.vrt.adapter.VrtListAdapter;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
 import com.jzycc.android_vrt.vrt.manager.VRTViewManager;
 import com.jzycc.android_vrt.vrt_js.constant.Constant;
@@ -40,7 +44,7 @@ import okhttp3.Response;
  * author Jzy(Xiaohuntun)
  * date 18-9-26
  */
-public class VRTJsEngine implements VRTLifeCycle{
+public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
 
     private static final String TAG = "VRTJsEngine";
 
@@ -106,6 +110,12 @@ public class VRTJsEngine implements VRTLifeCycle{
                 requestRender(result);
             }
         });
+
+        String s = "var method_Api_rhino_test = ScriptAPI.getMethod(\"rhino_test\",[java.lang.String])\n" +
+                "function rhino_test() {\n" +
+                "    var str = \"jzy666\";\n" +
+                "    method_Api_rhino_test .invoke(javaContext,str);\n" +
+                "}";
     }
 
     public void requestRender(String jsCode){
@@ -117,7 +127,6 @@ public class VRTJsEngine implements VRTLifeCycle{
             ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(this,scope));
             ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(clazz.getClassLoader(),scope));
             Object x = rhino.evaluateString(scope, jsCode, clazz.getSimpleName(), 1, null);
-            isRender = true;
             callBackViewDidLoad();
         }finally {
 
@@ -154,7 +163,6 @@ public class VRTJsEngine implements VRTLifeCycle{
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                
                 final String jsCode = response.body().string();
                 if(!TextUtils.isEmpty(jsCode)){
                     activity.runOnUiThread(new Runnable() {
@@ -206,15 +214,19 @@ public class VRTJsEngine implements VRTLifeCycle{
     public void onDestroy() {
         org.mozilla.javascript.Context.exit();
     }
-    
+
+    @Override
     public int api_getBaseViewWidth(){
         if(isHasParent){
+            //Log.i(TAG, "api_getBaseViewWidth: "+ CalculateUtils.px2dip(mContext, viewWidth));
             return viewWidth;
         }else {
+            //Log.i(TAG, "api_getBaseViewWidth: "+ CalculateUtils.px2dip(mContext ,CalculateUtils.getWindowWidth(windowManager)));
             return CalculateUtils.getWindowWidth(windowManager);
         }
     }
 
+    @Override
     public int api_getBaseViewHeight(){
         if(isHasParent){
             return viewHeight;
@@ -223,16 +235,19 @@ public class VRTJsEngine implements VRTLifeCycle{
         }
     }
 
+    @Override
     public void api_log(String msg){
         Log.i("jzy111", "api_log: "+msg);
     }
 
+    @Override
     public void api_commitVC4Android(String jsonStr){
         vc = gson.fromJson(jsonStr, ViewControllerData.class);
         setViewController(vc);
-        Log.i("jzy111", "api_commitVC4Android: "+jsonStr);
+        //Log.i("jzy111", "api_commitVC4Android: "+jsonStr);
     }
 
+    @Override
     public void api_refreshView(String refreshMsg){
         if(isRender){
             VrtRefreshMsg vrtRefreshMsg = gson.fromJson(refreshMsg,VrtRefreshMsg.class);
@@ -241,27 +256,27 @@ public class VRTJsEngine implements VRTLifeCycle{
 
     }
 
+    @Override
     public void api_httpRequest(String  jsObjectJsonStr){
         VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
         vrtJsManager.callbackHttpRequestForJs(vrtRequestBody.getUrl(),vrtRequestBody.get_param());
-        Log.i("jzy111", "api_httpRequest: "+vrtRequestBody.get_param());
     }
 
+    @Override
     public void api_httpRequest_iKu(String jsObjectJsonStr){
-        Log.i(TAG, "api_httpRequest_iKu: "+jsObjectJsonStr);
         VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
-        Log.i(TAG, "api_httpRequest_iKu: "+vrtRequestBody);
     }
 
+    @Override
     public void api_addViewClick(String vrtId){
         vrtJsManager.getClickableViewVrtIds().add(vrtId);
-        Log.i("jzy111", "api_addViewClick: "+vrtId);
     }
 
     private void setViewController(ViewControllerData vc){
         try{
             ViewController viewController = new ViewController(mContext,vrtJsManager,vc);
             vrtView = viewController.getVRTRenderView();
+            isRender = true;
             VRTRenderListener.renderSuccess(vrtView);
         }catch (Exception e){
             Log.e("VRTJsEngine", "setViewController: ",e );
@@ -274,30 +289,40 @@ public class VRTJsEngine implements VRTLifeCycle{
         function.call(rhino,scope,scope,functionParams);
     }
 
+    @Override
     public Map<String,Object> api_getThisNavigationComp(){
         Map<String, Object> map = new HashMap<>();
         map.put("url",url);
         return  map;
     }
 
+    @Override
     public void api_pushUrlWithParam(String jsonStrt){
         Map param = gson.fromJson(jsonStrt,Map.class);
-        Log.i(TAG, "api_pushUrlWithParam: "+param);
+        //Log.i(TAG, "api_pushUrlWithParam: "+param);
     }
 
+    @Override
     public void api_getPushedParam(){
 
     }
 
+    @Override
     public void api_popThis(){
 
     }
 
+    @Override
     public void api_refreshListData(String jsonStr){
-        Log.i(TAG, "api_refreshListData: "+jsonStr);
+        VrtSectionData vrtSectionData = gson.fromJson(jsonStr, VrtSectionData.class);
+
+        RecyclerView recyclerView = (RecyclerView) vrtViewManager.getVrtViewMap().get(vrtSectionData.get_vrtId());
+        Log.i("jzy111", "api_refreshListData: "+recyclerView);
+        VrtListAdapter vrtListAdapter = new VrtListAdapter(mContext,vrtJsManager,VrtListAdapter.getList(vrtSectionData));
+        recyclerView.setAdapter(vrtListAdapter);
     }
 
-    public void api_commitCell(String jsonStr){
-        Log.i(TAG, "api_commitCell: "+jsonStr);
+    public VRTViewManager getVrtViewManager() {
+        return vrtViewManager;
     }
 }

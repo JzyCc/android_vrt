@@ -19,4 +19,10 @@ public class CalculateUtils {
 
         return height;
     }
+
+
+    public static int px2dip(Context context, int px) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (px / scale + 0.5f);
+    }
 }

@@ -149,33 +149,30 @@ function api_dispatchWithAnimation(duration,func){
 
 //更新list
 var method_Api_refreshListData = ScriptAPI.getMethod("api_refreshListData",[java.lang.String])
-function api_refreshListData(_vrtId,numberOfSections,numberOfRowsAtSection){
-   var section = new Section()
+function api_refreshListData(_vrtId, numberOfSections, offset, length, rowDataAtSection){
+    var section = new Section();
+
     section.numberOfSections = numberOfSections;
-    section.numberOfRowsAtSection = numberOfRowsAtSection;
+
+    for(var i = 0; i < numberOfSections; i++)
+    {
+        var dataArray = rowDataAtSection[i + ""];
+        dataArray.forEach(cell => {
+            getVcForAndroid([cell]);
+        });
+    }
+    section.rowDataAtSection = rowDataAtSection;
     section._vrtId = _vrtId;
-
-    var str = JSON.stringify(section)
-
-    method_Api_refreshListData(javaContext,str)
+    var str = JSON.stringify(section);
+    api_log(str);
+    method_Api_refreshListData.invoke(javaContext,str);
 }
+
 function Section(){
         var _vrtId
         var numberOfSections
-        var numberOfRowsAtSection
+        var rowDataAtSection
 }
 
-var method_Api_commitCell = ScriptAPI.getMethod("api_commitCell",[java.lang.String])
-function api_commitCell(cell){
-    var vc1 = new View()
-
-    vc1 = cell
-
-    getVcForAndroid([vc1])
-
-    var str = JSON.stringify(vc1)
-
-    method_Api_commitCell.invoke(javaContext,str)
-}
 
 

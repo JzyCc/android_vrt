@@ -6,10 +6,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.jzycc.android_vrt.model.VrtSectionData;
 import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.vrt.VrtCell;
 import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
 import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Jzy
@@ -18,31 +23,31 @@ import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
 public class VrtListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private Context mContext;
-    private VrtViewData vrtViewData;
     private int nowPosition = 0;
     private VRTJsManager vrtJsManager;
+    private List<VrtViewData> mList;
+    private static int typeNumber;
 
-    public VrtListAdapter(Context mContext, VRTJsManager vrtJsManager, VrtViewData vrtViewData) {
+    public VrtListAdapter(Context mContext, VRTJsManager vrtJsManager, List<VrtViewData> mList) {
         this.mContext = mContext;
-        this.vrtViewData = vrtViewData;
         this.vrtJsManager = vrtJsManager;
+        this.mList = mList;
     }
 
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(new VrtCell(mContext,vrtJsManager,vrtViewData.get_cell().get(viewType),vrtViewData.get_dataSource().get(viewType).get(nowPosition),viewType,nowPosition));
+        return new ViewHolder(new VrtCell(mContext,vrtJsManager, mList.get(nowPosition),nowPosition));
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-
     }
 
     @Override
     public int getItemCount() {
-        return getCellCount();
+        return mList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -54,56 +59,17 @@ public class VrtListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        nowPosition = getPositionForJs(position);
-        return getCellType(position);
+        nowPosition = position;
+        return 0;
     }
 
-    /**
-     * @param position
-     * @return jsPosition
-     * get position for JS because low b iOS
-     */
-    private int getPositionForJs(int position){
-        int jsPosition = 0;
-        int allPosition = 0;
-        for(int i = 0; i < vrtViewData.get_cell().size(); i++){
-            int nowCellCount = vrtViewData.get_dataSource().get(i).size();
-            if(position <= (allPosition + nowCellCount -1)){
-                jsPosition = position-allPosition;
-                break;
-            }
-            allPosition = allPosition + nowCellCount-1;
+    public static List<VrtViewData> getList(VrtSectionData vrtSectionData){
+        List<VrtViewData> list = new ArrayList<>();
+        typeNumber = vrtSectionData.getNumberOfSections();
+        for (String key : vrtSectionData.getRowDataAtSection().keySet()){
+            list.addAll(vrtSectionData.getRowDataAtSection().get(key));
         }
-        return jsPosition;
-    }
 
-    /**
-     * @param position
-     * @return itemType
-     * get itemview type
-     */
-    private int getCellType(int position){
-        int type = 0;
-        int allCellCount = 0;
-        for(int i = 0; i < vrtViewData.get_cell().size(); i++){
-            allCellCount += allCellCount;
-            if(position < allCellCount){
-                type = i;
-                break;
-            }
-        }
-        return type;
-    }
-
-    /**
-     * @return itemCount
-     * get itemview count
-     */
-    private int getCellCount(){
-        int count = 0;
-        for(int i = 0; i < vrtViewData.get_cell().size(); i++){
-            count+=vrtViewData.get_dataSource().get(i).size();
-        }
-        return count;
+        return list;
     }
 }

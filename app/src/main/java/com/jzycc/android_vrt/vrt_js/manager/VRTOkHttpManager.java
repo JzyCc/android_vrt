@@ -1,5 +1,8 @@
 package com.jzycc.android_vrt.vrt_js.manager;
 
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,9 +30,13 @@ public class VRTOkHttpManager {
         return vrtOkHttpManager;
     }
 
-    public VRTOkHttpManager() {
-        client = new OkHttpClient();
+    private VRTOkHttpManager() {
+        client = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10,TimeUnit.SECONDS)
+                .build();
     }
+
 
     public OkHttpClient getClient() {
         return client;

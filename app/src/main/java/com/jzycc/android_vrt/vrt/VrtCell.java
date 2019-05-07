@@ -1,10 +1,12 @@
 package com.jzycc.android_vrt.vrt;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -28,18 +30,13 @@ public class VrtCell extends FrameLayout{
     private VrtViewRenderHelper vrtViewRenderHelper;
     private int position;
     private int type;
-    private HashMap<String,Object> data = new HashMap<>();
     private VRTJsManager vrtJsManager;
 
 
-    public VrtCell(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData cell, Object data,int type, int position) {
+    public VrtCell(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData cell, int position) {
         super(context);
         this.cell = cell;
-        Gson gson = new Gson();
-        String jsonStr = gson.toJson(data);
-        this.data = gson.fromJson(jsonStr,HashMap.class);
         this.vrtJsManager = vrtJsManager;
-        this.type = type;
         this.position = position;
         initThis();
     }
@@ -63,26 +60,28 @@ public class VrtCell extends FrameLayout{
     }
 
     private void initThis(){
-        vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager,type,position);
+        vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager);
         vrtJsManager.setClickListenerForCell(this,cell.get_vrtId(),type,position);
-        setBackgroundColor(vrtViewRenderHelper.getColor(cell.getBackgroundColor()));
+        //setBackgroundColor(0xffffffff);
+        setMinimumWidth((int) cell.get_width());
+        setMinimumHeight((int) cell.get_height());
         if(cell!=null){
             for(VrtViewData vrtView:cell.getSubViews()){
                 switch (vrtView.get_clsName()){
                     case VrtComponentType.LABEL:
-                        vrtViewRenderHelper.setTextView(vrtView,data);
+                        vrtViewRenderHelper.setTextView(vrtView);
                         break;
                     case VrtComponentType.IMGVIEW:
-                        vrtViewRenderHelper.setImageView(vrtView,data);
+                        vrtViewRenderHelper.setImageView(vrtView);
                         break;
                     case VrtComponentType.LIST:
-                        vrtViewRenderHelper.setRecyclerView(vrtView,data);
+                        vrtViewRenderHelper.setRecyclerView(vrtView);
                         break;
                     case VrtComponentType.TEXTFIELD:
-                        vrtViewRenderHelper.setEditText(vrtView,data);
+                        vrtViewRenderHelper.setEditText(vrtView);
                         break;
                     case VrtComponentType.VIEW:
-                        vrtViewRenderHelper.setViewParent(vrtView,data);
+                        vrtViewRenderHelper.setViewParent(vrtView);
                         break;
                 }
                 points.add(new Point((int) vrtView.get_x(),(int) vrtView.get_y()));
