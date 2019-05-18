@@ -43,21 +43,9 @@ function getVcForAndroid(v){
 }
 
 //log
-var method_Api_log = ScriptAPI.getMethod("api_log",[java.lang.String])
+var method_Api_log = ScriptAPI.getMethod("api_log",[java.lang.Object])
 function api_log(msg){
     method_Api_log.invoke(javaContext,msg)
-}
-
-//获取本地高
-var method_Api_getBaseViewWidth = ScriptAPI.getMethod("api_getBaseViewWidth")
-function api_getBaseViewWidth(){
-    return method_Api_getBaseViewWidth.invoke(javaContext)*1;
-}
-
-//获取本地宽
-var method_Api_getBaseViewHeight = ScriptAPI.getMethod("api_getBaseViewHeight")
-function api_getBaseViewHeight(){
-    return method_Api_getBaseViewHeight.invoke(javaContext)*1;
 }
 
 //获取设备系统名
@@ -87,19 +75,6 @@ var method_Api_httpRequest = ScriptAPI.getMethod("api_httpRequest",[java.lang.St
 function api_httpRequest(jsObject){
     var jsonStr = JSON.stringify(jsObject)
     method_Api_httpRequest.invoke(javaContext,jsonStr)
-}
-
-//无必要的网络请求 ：）
-var method_Api_httpRequest_iku = ScriptAPI.getMethod("api_httpRequest_iKu",[java.lang.String])
-function api_httpRequest_iKu(jsObject){
-    var jsonStr = JSON.stringify(jsObject)
-    method_Api_httpRequest_iku.invoke(javaContext,jsonStr)
-}
-
-//点击回调
-var method_Api_addViewClick = ScriptAPI.getMethod("api_addViewClick",[java.lang.String])
-function api_addViewClick(vrtId){
-    method_Api_addViewClick.invoke(javaContext,vrtId+"")
 }
 
 //导航栏

@@ -49,9 +49,15 @@ public class VrtImageView extends FrameLayout{
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         final int childCount = getChildCount();
-        for(int i = 1 ;i < childCount; i++){
-            View child = getChildAt(i);
-            child.layout(points.get(i-1).x,points.get(i-1).y,points.get(i-1).x+getChildAt(i-1).getWidth(),points.get(i-1).y+getChildAt(i-1).getHeight());
+        if (points != null && points.size() >= childCount){
+            for(int i = 0 ;i < childCount; i++){
+                VrtViewData vrtViewData = vc.getSubViews().get(i);
+                View child = getChildAt(i);
+                child.layout((int) (vrtViewData.get_x()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_x()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getWidth(),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getHeight());
+            }
         }
     }
 
@@ -76,7 +82,7 @@ public class VrtImageView extends FrameLayout{
                         vrtViewRenderHelper.setViewParent(vrtView);
                         break;
                 }
-                points.add(new Point((int) vrtView.get_x(),(int) vrtView.get_y()));
+                points.add(new Point((int) (vrtView.get_x()*vrtJsManager.getScale()+0.5f),(int) (vrtView.get_y()*vrtJsManager.getScale()+0.5f)));
             }
         }
     }

@@ -27,18 +27,20 @@ public class VrtListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private VRTJsManager vrtJsManager;
     private List<VrtViewData> mList;
     private static int typeNumber;
+    private String listId;
 
-    public VrtListAdapter(Context mContext, VRTJsManager vrtJsManager, List<VrtViewData> mList) {
+    public VrtListAdapter(Context mContext, VRTJsManager vrtJsManager, String listId,  List<VrtViewData> mList) {
         this.mContext = mContext;
         this.vrtJsManager = vrtJsManager;
         this.mList = mList;
+        this.listId = listId;
     }
 
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(new VrtCell(mContext,vrtJsManager, mList.get(nowPosition),nowPosition));
+        return new ViewHolder(new VrtCell(mContext,vrtJsManager, listId, mList.get(nowPosition),nowPosition));
     }
 
     @Override

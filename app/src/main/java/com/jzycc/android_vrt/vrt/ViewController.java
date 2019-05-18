@@ -1,6 +1,7 @@
 package com.jzycc.android_vrt.vrt;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 import com.jzycc.android_vrt.model.ViewControllerData;
@@ -18,11 +19,12 @@ public class ViewController {
     private Context context;
     private VrtViewRenderHelper vrtViewRenderHelper;
 
-    public ViewController(Context context, VRTJsManager vrtJsManager, ViewControllerData viewControllerData) {
+    public ViewController(Context context, VRTJsManager vrtJsManager, ViewControllerData viewControllerData, float width) {
         this.context = context;
         this.viewControllerData = viewControllerData;
         this.vrtJsManager = vrtJsManager;
         this.vrtViewRenderHelper = new VrtViewRenderHelper(context,vrtJsManager);
+        vrtJsManager.setCurrentWidth(width);
     }
 
     public View getVRTRenderView(){

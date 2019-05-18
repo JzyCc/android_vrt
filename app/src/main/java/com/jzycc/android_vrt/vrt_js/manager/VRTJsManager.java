@@ -13,12 +13,17 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jzycc.android_vrt.model.VrtColor;
 import com.jzycc.android_vrt.model.VrtRequestBody;
+import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.vrt.helper.VrtViewRenderHelper;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
+import com.jzycc.android_vrt.vrt.manager.VRTViewManager;
 import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
 import com.jzycc.android_vrt.vrt_js.constant.FunctionName;
 
+import org.mozilla.javascript.NativeJSON;
+
 import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +48,19 @@ public class VRTJsManager {
     private Gson gson;
     private Activity activity;
 
+    private float defaultWidth = 750f;
+    private float defaultHeight = 1334f;
+    private float currentWidth = 750f;
+
+    public void setCurrentWidth(float currentWidth) {
+        this.currentWidth = currentWidth;
+    }
+
+    public float getScale(){
+        return currentWidth/defaultWidth;
+    }
+
+
 
     public VRTJsManager(Context context,VRTJsEngine vrtJsEngine) {
         this.vrtJsEngine = vrtJsEngine;
@@ -51,36 +69,26 @@ public class VRTJsManager {
         vrtSdkManager = VRTSdkManager.getInstance();
         vrtOkHttpManager = VRTOkHttpManager.getInstance();
         this.gson = new Gson();
+        this.vrtViewManager = vrtJsEngine.getVrtViewManager();
     }
 
-    private List<String> clickableViewVrtIds = new ArrayList<>();
-
-    private HashMap<String, View> viewMap = new HashMap<>();
-
-    public List<String> getClickableViewVrtIds() {
-        return clickableViewVrtIds;
-    }
+    private VRTViewManager vrtViewManager;
 
     public HashMap<String, View> getViewMap() {
-        return viewMap;
+        return vrtViewManager.getVrtViewMap();
     }
 
-    public void setClickableViewVrtIds(List<String> clickableViewVrtIds) {
-        this.clickableViewVrtIds = clickableViewVrtIds;
+    public HashMap<String, VrtViewData> getViewDataMap(){
+        return vrtViewManager.getvrtViewDataMap();
     }
-
 
     public void setClickListenerForView(final View view, final String vrtId){
-        for(String _vrtId: clickableViewVrtIds){
-            if(vrtId.equals(_vrtId)){
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        vrtJsEngine.callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{vrtId});
-                    }
-                });
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vrtJsEngine.callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{vrtId});
             }
-        }
+        });
     }
 
     public void setClickListenerForCell(final View view, final String vrtId, final int type, final int position){
@@ -88,24 +96,38 @@ public class VRTJsManager {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i("jzy", "onClick: "+type+"，"+position);
+                    Log.i("jzy111", "onClick: "+vrtId);
                     vrtJsEngine.callFunction(FunctionName.API_RESPONSE_LIST_DID_SELECT_ROW,new Object[]{vrtId + "CallBackDidSelectRowAtIndexPath",type,position});
                 }
             });
         }
     }
 
+    public void notifyTextChanged(final String vrtId, String text){
+        vrtJsEngine.callFunction(FunctionName.API_RESPONSE_TEXT_FIELD_RETURN,new Object[]{vrtId+"CallBackDidChange", text});
+    }
+
     public void refreshView(String vrtId, String attributeName, Object param){
-        if(viewMap.get(vrtId)!=null&&param!=null){
-            View view = viewMap.get(vrtId);
+        if(vrtJsEngine.getVrtViewManager().getVrtViewMap().get(vrtId)!=null && param!=null){
+            View view = vrtViewManager.getVrtViewMap().get(vrtId);
+            VrtViewData vrtViewData = vrtViewManager.getvrtViewDataMap().get(vrtId);
+            view.bringToFront();
             switch (attributeName){
                 case "backgroundColor":
                     VrtColor color = (VrtColor)param;
                     view.setBackgroundColor(VrtViewRenderHelper.getColor(color));
                     break;
                 case "_x":
+                    int valueX = Double.valueOf(param.toString()).intValue();
+                    view.layout((int) valueX, view.getTop(), view.getMeasuredWidth()+ valueX ,view.getBottom());
+                    view.invalidate();
                     break;
                 case "_y":
+                    int valueY = Double.valueOf(param.toString()).intValue();
+                    vrtViewData.set_y(valueY);
+                    view.layout(view.getLeft(), valueY, view.getRight() ,valueY + view.getMeasuredHeight());
+                    view.invalidate();
+                    view.getParent().requestLayout();
                     break;
                 case "_width":
                     break;
@@ -161,9 +183,20 @@ public class VRTJsManager {
         }
     }
 
-    public void callbackHttpRequestForJs(final String url, Object dataMap){
+    public void callbackHttpRequestForJs(final String url, HashMap<String,Object> dataMap){
         String json = gson.toJson(dataMap);
-        vrtOkHttpManager.getClient().newCall(VRTOkHttpManager.getHttpRequest(url,json)).enqueue(new Callback() {
+        StringBuilder urlsb = new StringBuilder(url);
+        urlsb.append("?");
+        boolean isFirstParam = true;
+        for ( String key : dataMap.keySet()){
+            if (isFirstParam){
+                isFirstParam = false;
+                urlsb.append(key).append("=").append(dataMap.get(key));
+            }else {
+                urlsb.append("&").append(key).append("=").append(dataMap.get(key));
+            }
+        }
+        vrtOkHttpManager.getClient().newCall(VRTOkHttpManager.getJsByUrl(urlsb.toString())).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.e(TAG, "onFailure: ", e);
@@ -173,16 +206,17 @@ public class VRTJsManager {
             public void onResponse(Call call, final Response response) throws IOException {
 
                 if(Looper.getMainLooper().getThread() == Thread.currentThread()){
+
                 }else {
-                    Log.i(TAG, "onResponse: "+"is not currentThread");
-                    Map map = new HashMap();
-                    map = gson.fromJson(response.body().string(),HashMap.class);
-                    final Map reponseMap = map;
+                    Log.i("jzy111", "onResponse: "+"is not currentThread ");
+                    final String reponseBody = response.body().string();
+                    Log.i(TAG, "onResponse: "+reponseBody);
+                    //final  Map reponseMap = gson.fromJson(reponseBody,HashMap.class);
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.i(TAG, "onResponse: "+reponseMap);
-                            vrtJsEngine.callFunction(FunctionName.API_HTTP_RESPONSE,new Object[]{url,reponseMap,""});
+                            Object o = vrtJsEngine.getNativeJsonObject(reponseBody);
+                            vrtJsEngine.callFunction(FunctionName.API_HTTP_RESPONSE,new Object[]{url, o, ""});
                         }
                     });
                 }

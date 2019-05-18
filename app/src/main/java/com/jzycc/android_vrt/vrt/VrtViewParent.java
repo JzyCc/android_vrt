@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -49,9 +50,15 @@ public class VrtViewParent extends FrameLayout{
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed,l,t,r,b);
         final int childCount = getChildCount();
-        for(int i = 0 ;i < childCount; i++){
-            View child = getChildAt(i);
-            child.layout(points.get(i).x,points.get(i).y,points.get(i).x+getChildAt(i).getWidth(),points.get(i).y+getChildAt(i).getHeight());
+        if (points != null && points.size() >= childCount){
+            for(int i = 0 ;i < childCount; i++){
+                VrtViewData vrtViewData = vc.getSubViews().get(i);
+                View child = getChildAt(i);
+                child.layout((int) (vrtViewData.get_x()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_x()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getWidth(),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getHeight());
+            }
         }
     }
 
@@ -80,7 +87,7 @@ public class VrtViewParent extends FrameLayout{
                         vrtViewRenderHelper.setViewParent(vrtView);
                         break;
                 }
-                points.add(new Point((int) vrtView.get_x(),(int) vrtView.get_y()));
+                points.add(new Point((int) (vrtView.get_x()*vrtJsManager.getScale()+0.5f),(int) (vrtView.get_y()*vrtJsManager.getScale()+0.5f)));
             }
         }
     }

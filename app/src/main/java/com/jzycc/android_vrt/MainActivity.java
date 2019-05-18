@@ -6,56 +6,49 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.jzycc.android_vrt.utils.FileUtils;
 import com.jzycc.android_vrt.vrt_js.constant.Constant;
 import com.jzycc.android_vrt.vrt_js.VRTJsEngine;
 import com.jzycc.android_vrt.vrt_js.VRTRenderListener;
+import com.jzycc.android_vrt.vrt_js.manager.VRTJSNativeContract;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class MainActivity extends AppCompatActivity implements VRTRenderListener {
+public class MainActivity extends AppCompatActivity implements VRTRenderListener, VRTJSNativeContract {
 
-    private VRTJsEngine VRTJsEngine;
+    private VRTJsEngine vrtJsEngine;
     private FrameLayout frameLayout;
-
-    private static final String JS_CALL_JAVA_FUNCTION =
-            "var ScriptAPI = java.lang.Class.forName(\"" + MainActivity.class.getName() + "\", true, javaLoader);" +
-                    "var methodRead = ScriptAPI.getMethod(\"jsCallJava\", [java.lang.String]);" +
-                    "function jsCallJava(url) {return methodRead.invoke(javaContext, url);}" +
-                    "function Test(url){ return jsCallJava(url); }";
-
-    private static final String JS_HEADER = "var ScriptAPI = java.lang.Class.forName(\"" + MainActivity.class.getName() + "\", true, javaLoader);" +
-            "var methodRead = ScriptAPI.getMethod(\"native_commitVC\", [java.lang.Object]);\n"
-            + Constant.JAVA_CALL_JS_FUNCTION;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        VRTJsEngine = new VRTJsEngine(this);
-        frameLayout = (FrameLayout)findViewById(R.id.fl_layout);
-        VRTJsEngine.requestRenderByUrl("http://21xa689434.imwork.net:8090/public/tmp/personalHomePage.js",frameLayout);
-        //VRTJsEngine.requestRenderByFile("VRTJSCode.js");
+        vrtJsEngine = new VRTJsEngine(this);
+        frameLayout = findViewById(R.id.fl_layout);
+        vrtJsEngine.requestRenderByUrl("https://21xa689434.imwork.net:23333/public/tmp/VRTJSFramework/code/VRTDebugger/VRTDebugger.js",frameLayout);
     }
 
     @Override
     public void renderSuccess(View view) {
-        frameLayout.addView(view);
-        VRTJsEngine.onStart();
-        VRTJsEngine.onResume();
+        frameLayout.addView(view,new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        VRTJsEngine.onStart();
+    }
+
+    @Override
+    public Object getPushParams() {
+        return vrtJsEngine.getNativeJsonObject("");
     }
 }

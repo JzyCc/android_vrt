@@ -18,17 +18,20 @@ import com.jzycc.android_vrt.model.VrtSectionData;
 import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.utils.CalculateUtils;
 import com.jzycc.android_vrt.utils.FileUtils;
+import com.jzycc.android_vrt.vrt.VRTActivity;
 import com.jzycc.android_vrt.vrt.ViewController;
-import com.jzycc.android_vrt.vrt.VrtViewParent;
 import com.jzycc.android_vrt.vrt.adapter.VrtListAdapter;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
 import com.jzycc.android_vrt.vrt.manager.VRTViewManager;
 import com.jzycc.android_vrt.vrt_js.constant.Constant;
 import com.jzycc.android_vrt.vrt_js.constant.FunctionName;
+import com.jzycc.android_vrt.vrt_js.manager.VRTJSNativeContract;
 import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
 import com.jzycc.android_vrt.vrt_js.manager.VRTOkHttpManager;
 
+import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeJSON;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -41,7 +44,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 /**
- * author Jzy(Xiaohuntun)
+ * author Jzy
  * date 18-9-26
  */
 public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
@@ -61,7 +64,7 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
     private VRTViewManager vrtViewManager;
     private int viewHeight;
     private boolean isHasParent = false;
-    private boolean isRender = false;
+    private boolean isRender = true;
     private org.mozilla.javascript.Context rhino;
     private Scriptable scope;
     private String vcJsCode = Constant.JAVA_CALL_JS_FUNCTION;
@@ -70,18 +73,19 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
     private Activity activity;
     private VRTJsManager vrtJsManager;
     private String url = "";
-
+    private VRTJSNativeContract vrtjsNativeContract;
     public VRTJsEngine(Activity mContext) {
         this.mContext = mContext;
         this.activity = mContext;
         this.clazz = VRTJsEngine.class;
         this.VRTRenderListener = (VRTRenderListener)mContext;
         this.vrtSdkManager = VRTSdkManager.getInstance();
-        this.vrtViewManager = new VRTViewManager(new HashMap<String, View>());
+        this.vrtViewManager = new VRTViewManager(new HashMap<String, View>(), new HashMap<String, VrtViewData>());
         this.vrtJsManager = new VRTJsManager(mContext,this);
         windowManager = mContext.getWindowManager();
         this.gson = new Gson();
         initJSStr();
+        vrtjsNativeContract = (VRTJSNativeContract)mContext;
     }
 
     private void initJSStr(){
@@ -103,7 +107,7 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
                 String vrtJsFrameworkCode = FileUtils.FiletoString(mContext,"VRTJSFramework.js");
 
                 String result = "var ScriptAPI = java.lang.Class.forName(\"" + VRTJsEngine.class.getName() + "\", true, javaLoader);\n" +
-                        vrtjsAndroidFunction+
+                        vrtjsAndroidFunction +
                         vrtJsFrameworkCode+
                         jsCode;
 
@@ -127,6 +131,8 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
             ScriptableObject.putProperty(scope,"javaContext", org.mozilla.javascript.Context.javaToJS(this,scope));
             ScriptableObject.putProperty(scope,"javaLoader", org.mozilla.javascript.Context.javaToJS(clazz.getClassLoader(),scope));
             Object x = rhino.evaluateString(scope, jsCode, clazz.getSimpleName(), 1, null);
+            onStart();
+            onResume();
             callBackViewDidLoad();
         }finally {
 
@@ -185,28 +191,28 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
     @Override
     public void onStart() {
         if(isRender){
-            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{(vc.get_vrtId()+"CallBackViewWillAppear")});
+            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{("CallBackViewWillAppear")});
         }
     }
 
     @Override
     public void onResume() {
         if(isRender){
-            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{(vc.get_vrtId()+"CallBackViewDidAppear")});
+            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{("CallBackViewDidAppear")});
         }
     }
 
     @Override
     public void callBackViewDidLoad() {
         if(isRender){
-            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{(vc.get_vrtId()+"CallBackViewDidLoad")});
+            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{("CallBackViewDidLoad")});
         }
     }
 
     @Override
     public void onPause() {
         if(isRender){
-            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{(vc.get_vrtId()+"CallBackViewWillDisappear")});
+            callFunction(FunctionName.API_RESPONSE_BASIC_CALL_BACK,new Object[]{("CallBackViewWillDisappear")});
         }
     }
 
@@ -215,45 +221,26 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
         org.mozilla.javascript.Context.exit();
     }
 
-    @Override
-    public int api_getBaseViewWidth(){
-        if(isHasParent){
-            //Log.i(TAG, "api_getBaseViewWidth: "+ CalculateUtils.px2dip(mContext, viewWidth));
-            return viewWidth;
-        }else {
-            //Log.i(TAG, "api_getBaseViewWidth: "+ CalculateUtils.px2dip(mContext ,CalculateUtils.getWindowWidth(windowManager)));
-            return CalculateUtils.getWindowWidth(windowManager);
-        }
-    }
 
     @Override
-    public int api_getBaseViewHeight(){
-        if(isHasParent){
-            return viewHeight;
-        }else {
-            return CalculateUtils.getWindowHeight(windowManager);
-        }
-    }
-
-    @Override
-    public void api_log(String msg){
+    public void api_log(Object msg){
         Log.i("jzy111", "api_log: "+msg);
     }
 
     @Override
     public void api_commitVC4Android(String jsonStr){
         vc = gson.fromJson(jsonStr, ViewControllerData.class);
-        setViewController(vc);
-        //Log.i("jzy111", "api_commitVC4Android: "+jsonStr);
+        if(isHasParent){
+            setViewController(vc,viewWidth);
+        }else {
+            setViewController(vc,CalculateUtils.getWindowWidth(windowManager));
+        }
     }
 
     @Override
     public void api_refreshView(String refreshMsg){
-        if(isRender){
-            VrtRefreshMsg vrtRefreshMsg = gson.fromJson(refreshMsg,VrtRefreshMsg.class);
-            vrtJsManager.refreshView(vrtRefreshMsg.get_vrtId(),vrtRefreshMsg.get_key(),vrtRefreshMsg.get_newValue());
-        }
-
+        VrtRefreshMsg vrtRefreshMsg = gson.fromJson(refreshMsg,VrtRefreshMsg.class);
+        vrtJsManager.refreshView(vrtRefreshMsg.get_vrtId(),vrtRefreshMsg.get_key(),vrtRefreshMsg.get_newValue());
     }
 
     @Override
@@ -262,19 +249,9 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
         vrtJsManager.callbackHttpRequestForJs(vrtRequestBody.getUrl(),vrtRequestBody.get_param());
     }
 
-    @Override
-    public void api_httpRequest_iKu(String jsObjectJsonStr){
-        VrtRequestBody vrtRequestBody = gson.fromJson(jsObjectJsonStr, VrtRequestBody.class);
-    }
-
-    @Override
-    public void api_addViewClick(String vrtId){
-        vrtJsManager.getClickableViewVrtIds().add(vrtId);
-    }
-
-    private void setViewController(ViewControllerData vc){
+    private void setViewController(ViewControllerData vc, float width){
         try{
-            ViewController viewController = new ViewController(mContext,vrtJsManager,vc);
+            ViewController viewController = new ViewController(mContext,vrtJsManager,vc, width);
             vrtView = viewController.getVRTRenderView();
             isRender = true;
             VRTRenderListener.renderSuccess(vrtView);
@@ -289,6 +266,15 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
         function.call(rhino,scope,scope,functionParams);
     }
 
+    public Object getNativeJsonObject(String controlValueJsonString){
+        return NativeJSON.parse(rhino, scope, controlValueJsonString, new Callable() {
+            @Override
+            public Object call(org.mozilla.javascript.Context context, Scriptable scriptable, Scriptable scriptable1, Object[] objects) {
+                return objects[1];
+            }
+        });
+    }
+
     @Override
     public Map<String,Object> api_getThisNavigationComp(){
         Map<String, Object> map = new HashMap<>();
@@ -299,12 +285,12 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
     @Override
     public void api_pushUrlWithParam(String jsonStrt){
         Map param = gson.fromJson(jsonStrt,Map.class);
-        //Log.i(TAG, "api_pushUrlWithParam: "+param);
+        VRTActivity.start(mContext, param.get("url").toString(), param.get("param"));
     }
 
     @Override
-    public void api_getPushedParam(){
-
+    public Object api_getPushedParam(){
+        return vrtjsNativeContract.getPushParams();
     }
 
     @Override
@@ -317,8 +303,7 @@ public class VRTJsEngine implements VRTLifeCycle, VRTJSFunction{
         VrtSectionData vrtSectionData = gson.fromJson(jsonStr, VrtSectionData.class);
 
         RecyclerView recyclerView = (RecyclerView) vrtViewManager.getVrtViewMap().get(vrtSectionData.get_vrtId());
-        Log.i("jzy111", "api_refreshListData: "+recyclerView);
-        VrtListAdapter vrtListAdapter = new VrtListAdapter(mContext,vrtJsManager,VrtListAdapter.getList(vrtSectionData));
+        VrtListAdapter vrtListAdapter = new VrtListAdapter(mContext,vrtJsManager, vrtSectionData.get_vrtId(),VrtListAdapter.getList(vrtSectionData));
         recyclerView.setAdapter(vrtListAdapter);
     }
 

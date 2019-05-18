@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -12,13 +14,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.jzycc.android_vrt.R;
 import com.jzycc.android_vrt.model.VrtColor;
 import com.jzycc.android_vrt.model.VrtViewData;
 import com.jzycc.android_vrt.vrt.VrtImageView;
 import com.jzycc.android_vrt.vrt.manager.VRTSdkManager;
-import com.jzycc.android_vrt.vrt.adapter.VrtListAdapter;
 import com.jzycc.android_vrt.vrt.VrtViewParent;
 import com.jzycc.android_vrt.vrt_js.manager.VRTJsManager;
 
@@ -39,7 +38,7 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     private VRTJsManager vrtJsManager;
     private int position;
     private int type;
-
+    
     /**
      * @param vrtJsManager {@link VRTJsManager}
      * 此构造方法应该交由渲染根部构造
@@ -69,9 +68,10 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     public VrtViewParent setVRTRenderView(Context context, VrtViewData vrtViewData) {
         VrtViewParent vrtViewParent = new VrtViewParent(mContext,vrtJsManager,vrtViewData);
         vrtJsManager.getViewMap().put(vrtViewData.get_vrtId(),vrtViewParent);
-        vrtJsManager.setClickListenerForView(vrtViewParent,vrtViewData.get_vrtId());
+        if (vrtViewData.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(vrtViewParent,vrtViewData.get_vrtId());
+        }
         vrtViewParent.setBackgroundColor(getColor(vrtViewData.getBackgroundColor()));
-
         return vrtViewParent;
     }
 
@@ -82,8 +82,10 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
             textView.setText(vrtView.getText());
         }
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),textView);
-        vrtJsManager.setClickListenerForView(textView,vrtView.get_vrtId());
-        parent.addView(textView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(textView,vrtView.get_vrtId());
+        }
+        parent.addView(textView,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
@@ -92,23 +94,30 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
         if(getBindContent(vrtView.getText(),data)!=null){
             textView.setText(getBindContent(vrtView.getText(),data).toString());
         }
-        vrtJsManager.setClickListenerForCell(textView,vrtView.get_vrtId(),type,position);
-        parent.addView(textView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(textView,vrtView.get_vrtId());
+        }
+        parent.addView(textView,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setImageView(VrtViewData vrtView){
         VrtImageView vrtImageView = initImageView(vrtView);
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),vrtImageView);
-        vrtJsManager.setClickListenerForView(vrtImageView,vrtView.get_vrtId());
-        parent.addView(vrtImageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        vrtJsManager.getViewDataMap().put(vrtView.get_vrtId(), vrtView);
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(vrtImageView,vrtView.get_vrtId());
+        }
+        parent.addView(vrtImageView,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setImageView(VrtViewData vrtView,HashMap<String,Object> data){
         VrtImageView imageView = initImageView(vrtView);
-        vrtJsManager.setClickListenerForCell(imageView,vrtView.get_vrtId(),type,position);
-        parent.addView(imageView, new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(imageView,vrtView.get_vrtId());
+        }
+        parent.addView(imageView, new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
 
@@ -116,46 +125,73 @@ public class VrtViewRenderHelper implements VrtViewRenderService{
     public void setViewParent(VrtViewData vrtView){
         View view = new VrtViewParent(mContext,vrtJsManager,vrtView);
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),view);
-        vrtJsManager.setClickListenerForView(view,vrtView.get_vrtId());
+        vrtJsManager.getViewDataMap().put(vrtView.get_vrtId(), vrtView);
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(view,vrtView.get_vrtId());
+        }
         view.setBackgroundColor(getColor(vrtView.getBackgroundColor()));
-        parent.addView(view,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        parent.addView(view,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setViewParent(VrtViewData vrtView,HashMap<String,Object> data) {
         View view = new VrtViewParent(mContext,vrtJsManager,vrtView);
-        vrtJsManager.setClickListenerForCell(view,vrtView.get_vrtId(),type,position);
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(view,vrtView.get_vrtId());
+        }
         view.setBackgroundColor(getColor(vrtView.getBackgroundColor()));
-        parent.addView(view,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        parent.addView(view,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
-    public void setEditText(VrtViewData vrtView){
+    public void setEditText(final VrtViewData vrtView){
         EditText editText = initEditText(vrtView);
         editText.setText(vrtView.getText());
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),editText);
-        vrtJsManager.setClickListenerForView(editText,vrtView.get_vrtId());
-        parent.addView(editText,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(editText,vrtView.get_vrtId());
+        }
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                vrtJsManager.notifyTextChanged(vrtView.get_vrtId(), charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        parent.addView(editText,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setEditText(VrtViewData vrtView,HashMap<String,Object> data) {
         EditText editText = initEditText(vrtView);
         editText.setText(vrtView.getText());
-        parent.addView(editText,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        if (vrtView.get_enabledUserInteraction()){
+            vrtJsManager.setClickListenerForView(editText,vrtView.get_vrtId());
+        }
+        parent.addView(editText,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setRecyclerView(VrtViewData vrtView){
         RecyclerView recyclerView = initRecyclerView(vrtView);
         vrtJsManager.getViewMap().put(vrtView.get_vrtId(),recyclerView);
-        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
     @Override
     public void setRecyclerView(VrtViewData vrtView,HashMap<String,Object> data) {
         RecyclerView recyclerView = initRecyclerView(vrtView);
-        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)vrtView.get_width(),(int)vrtView.get_height()));
+        parent.addView(recyclerView,new ViewGroup.LayoutParams((int)(vrtView.get_width()*vrtJsManager.getScale()+0.5f),(int)(vrtView.get_height()*vrtJsManager.getScale()+0.5f)));
     }
 
 

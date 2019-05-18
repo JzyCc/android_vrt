@@ -31,13 +31,15 @@ public class VrtCell extends FrameLayout{
     private int position;
     private int type;
     private VRTJsManager vrtJsManager;
+    private String listId;
 
 
-    public VrtCell(@NonNull Context context, VRTJsManager vrtJsManager, VrtViewData cell, int position) {
+    public VrtCell(@NonNull Context context, VRTJsManager vrtJsManager, String listId,VrtViewData cell, int position) {
         super(context);
         this.cell = cell;
         this.vrtJsManager = vrtJsManager;
         this.position = position;
+        this.listId = listId;
         initThis();
     }
 
@@ -53,16 +55,21 @@ public class VrtCell extends FrameLayout{
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         final int childCount = getChildCount();
-        for(int i = 0 ;i < childCount; i++){
-            View child = getChildAt(i);
-            child.layout(points.get(i).x,points.get(i).y,points.get(i).x+getChildAt(i).getWidth(),points.get(i).y+getChildAt(i).getHeight());
+        if (points != null && points.size() >= childCount){
+            for(int i = 0 ;i < childCount; i++){
+                VrtViewData vrtViewData = cell.getSubViews().get(i);
+                View child = getChildAt(i);
+                child.layout((int) (vrtViewData.get_x()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f),
+                        (int)(vrtViewData.get_x()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getWidth(),
+                        (int)(vrtViewData.get_y()*vrtJsManager.getScale()+0.5f)+getChildAt(i).getHeight());
+            }
         }
     }
 
     private void initThis(){
         vrtViewRenderHelper = new VrtViewRenderHelper(this,vrtJsManager);
-        vrtJsManager.setClickListenerForCell(this,cell.get_vrtId(),type,position);
-        //setBackgroundColor(0xffffffff);
+        vrtJsManager.setClickListenerForCell(this,listId,type,position);
         setMinimumWidth((int) cell.get_width());
         setMinimumHeight((int) cell.get_height());
         if(cell!=null){
@@ -84,7 +91,7 @@ public class VrtCell extends FrameLayout{
                         vrtViewRenderHelper.setViewParent(vrtView);
                         break;
                 }
-                points.add(new Point((int) vrtView.get_x(),(int) vrtView.get_y()));
+                points.add(new Point((int) (vrtView.get_x()*vrtJsManager.getScale()+0.5f),(int) (vrtView.get_y()*vrtJsManager.getScale()+0.5f)));
             }
         }
     }

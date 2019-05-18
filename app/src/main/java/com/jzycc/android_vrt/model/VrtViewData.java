@@ -17,6 +17,7 @@ public class VrtViewData {
     private List<VrtViewData> subViews;
     private VrtColor backgroundColor;
     private float cornerRadius;
+    private Boolean _enabledUserInteraction;
 
     //EditView TextField Label
     private String text;
@@ -164,5 +165,13 @@ public class VrtViewData {
 
     public void set_dataSource(HashMap<Integer, List<Object>> _dataSource) {
         this._dataSource = _dataSource;
+    }
+
+    public Boolean get_enabledUserInteraction() {
+        return _enabledUserInteraction;
+    }
+
+    public void set_enabledUserInteraction(Boolean _enabledUserInteraction) {
+        this._enabledUserInteraction = _enabledUserInteraction;
     }
 }
